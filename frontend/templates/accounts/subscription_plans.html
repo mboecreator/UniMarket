@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+
+{% block title %}Seller Subscription Plans - CampusConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+    .subscription-page {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        background: #f8f8f8;
+        min-height: calc(100vh - 120px);
+    }
+
+    .subscription-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .subscription-title {
+        font-size: 36px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .subscription-subtitle {
+        font-size: 18px;
+        color: #666;
+        line-height: 1.5;
+    }
+
+    .current-subscription {
+        background: #e8f5e8;
+        border: 2px solid #28a745;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 40px;
+        text-align: center;
+    }
+
+    .current-subscription h3 {
+        color: #28a745;
+        margin-bottom: 10px;
+    }
+
+    .plans-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+
+    .plan-card {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        text-align: center;
+        position: relative;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .plan-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+
+    .plan-card.recommended {
+        border: 3px solid #ff6a00;
+        transform: scale(1.05);
+    }
+
+    .plan-card.recommended::before {
+        content: 'RECOMMENDED';
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #ff6a00;
+        color: white;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .plan-name {
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .plan-price {
+        font-size: 48px;
+        font-weight: 700;
+        color: #ff6a00;
+        margin-bottom: 5px;
+    }
+
+    .plan-period {
+        font-size: 16px;
+        color: #666;
+        margin-bottom: 30px;
+    }
+
+    .plan-features {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 30px;
+    }
+
+    .plan-features li {
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+        color: #555;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .plan-features li:last-child {
+        border-bottom: none;
+    }
+
+    .plan-features i {
+        color: #28a745;
+        font-size: 16px;
+    }
+
+    .plan-btn {
+        width: 100%;
+        padding: 15px;
+        background: #ff6a00;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .plan-btn:hover {
+        background: #e55a00;
+    }
+
+    .plan-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+
+    .benefits-section {
+        background: white;
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    .benefits-title {
+        font-size: 28px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 30px;
+    }
+
+    .benefits-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+    }
+
+    .benefit-item {
+        text-align: center;
+    }
+
+    .benefit-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #ff6a00, #e55a00);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px auto;
+        color: white;
+        font-size: 32px;
+    }
+
+    .benefit-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .benefit-description {
+        color: #666;
+        line-height: 1.5;
+    }
+
+    @media (max-width: 768px) {
+        .subscription-page {
+            padding: 20px 15px;
+        }
+
+        .subscription-title {
+            font-size: 28px;
+        }
+
+        .plans-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .plan-card.recommended {
+            transform: none;
+        }
+
+        .plan-price {
+            font-size: 36px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="subscription-page">
+    <div class="subscription-header">
+        <h1 class="subscription-title">Become a Seller</h1>
+        <p class="subscription-subtitle">Choose a subscription plan to start selling your products on CampusConnect</p>
+    </div>
+
+    {% if current_subscription %}
+        <div class="current-subscription">
+            <h3><i class="fas fa-check-circle"></i> Active Subscription</h3>
+            <p>You have an active {{ current_subscription.get_subscription_type_display }} subscription until {{ current_subscription.end_date|date:"F d, Y" }}</p>
+            <a href="{% url 'seller_dashboard' %}" class="plan-btn" style="max-width: 200px; margin: 10px auto; display: block;">
+                Go to Dashboard
+            </a>
+        </div>
+    {% endif %}
+
+    <div class="plans-grid">
+        <!-- Monthly Plan -->
+        <div class="plan-card">
+            <h3 class="plan-name">Monthly</h3>
+            <div class="plan-price">$10</div>
+            <div class="plan-period">per month</div>
+            <ul class="plan-features">
+                <li><i class="fas fa-check"></i> Unlimited product listings</li>
+                <li><i class="fas fa-check"></i> Message management</li>
+                <li><i class="fas fa-check"></i> Analytics dashboard</li>
+                <li><i class="fas fa-check"></i> Customer support</li>
+            </ul>
+            <form method="post" action="{% url 'subscribe' %}">
+                {% csrf_token %}
+                <input type="hidden" name="subscription_type" value="monthly">
+                <button type="submit" class="plan-btn" {% if current_subscription %}disabled{% endif %}>
+                    {% if current_subscription %}Current Plan{% else %}Choose Monthly{% endif %}
+                </button>
+            </form>
+        </div>
+
+        <!-- Quarterly Plan -->
+        <div class="plan-card recommended">
+            <h3 class="plan-name">Quarterly</h3>
+            <div class="plan-price">$25</div>
+            <div class="plan-period">per 3 months</div>
+            <ul class="plan-features">
+                <li><i class="fas fa-check"></i> Unlimited product listings</li>
+                <li><i class="fas fa-check"></i> Message management</li>
+                <li><i class="fas fa-check"></i> Analytics dashboard</li>
+                <li><i class="fas fa-check"></i> Priority customer support</li>
+                <li><i class="fas fa-check"></i> Featured listings</li>
+            </ul>
+            <form method="post" action="{% url 'subscribe' %}">
+                {% csrf_token %}
+                <input type="hidden" name="subscription_type" value="quarterly">
+                <button type="submit" class="plan-btn" {% if current_subscription %}disabled{% endif %}>
+                    {% if current_subscription %}Current Plan{% else %}Choose Quarterly{% endif %}
+                </button>
+            </form>
+        </div>
+
+        <!-- Yearly Plan -->
+        <div class="plan-card">
+            <h3 class="plan-name">Yearly</h3>
+            <div class="plan-price">$90</div>
+            <div class="plan-period">per year</div>
+            <ul class="plan-features">
+                <li><i class="fas fa-check"></i> Unlimited product listings</li>
+                <li><i class="fas fa-check"></i> Message management</li>
+                <li><i class="fas fa-check"></i> Advanced analytics</li>
+                <li><i class="fas fa-check"></i> Priority customer support</li>
+                <li><i class="fas fa-check"></i> Featured listings</li>
+                <li><i class="fas fa-check"></i> Promotional tools</li>
+            </ul>
+            <form method="post" action="{% url 'subscribe' %}">
+                {% csrf_token %}
+                <input type="hidden" name="subscription_type" value="yearly">
+                <button type="submit" class="plan-btn" {% if current_subscription %}disabled{% endif %}>
+                    {% if current_subscription %}Current Plan{% else %}Choose Yearly{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="benefits-section">
+        <h2 class="benefits-title">Why Become a Seller?</h2>
+        <div class="benefits-grid">
+            <div class="benefit-item">
+                <div class="benefit-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <h3 class="benefit-title">Earn Money</h3>
+                <p class="benefit-description">Turn your unused items into cash by selling to fellow students</p>
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="benefit-title">Reach Students</h3>
+                <p class="benefit-description">Connect directly with your university community</p>
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="benefit-title">Track Performance</h3>
+                <p class="benefit-description">Monitor views, likes, and messages for your products</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

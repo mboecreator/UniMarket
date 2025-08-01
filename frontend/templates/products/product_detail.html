@@ -1,0 +1,602 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.title }} - CampusConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-detail-page {
+        background: #f8f8f8;
+        min-height: calc(100vh - 120px);
+        padding: 30px 0;
+    }
+
+    .product-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .product-image-section {
+        position: relative;
+    }
+
+    .product-main-image {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+    }
+
+    .product-image-placeholder {
+        width: 100%;
+        height: 400px;
+        background: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+        font-size: 18px;
+    }
+
+    .product-content {
+        padding: 30px;
+    }
+
+    .product-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+
+    .product-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: #333;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .like-button {
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.3s ease;
+        padding: 10px;
+        border-radius: 50%;
+    }
+
+    .like-button.liked {
+        color: #e91e63;
+    }
+
+    .like-button:hover {
+        color: #e91e63;
+        background: rgba(233, 30, 99, 0.1);
+    }
+
+    .seller-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+
+    .seller-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff6a00, #e55a00);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 18px;
+    }
+
+    .seller-details h6 {
+        margin: 0;
+        color: #333;
+        font-weight: 600;
+    }
+
+    .seller-details p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+    }
+
+    .product-badges {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .product-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+
+    .badge-category {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .badge-condition {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+
+    .badge-available {
+        background: #e8f5e8;
+        color: #2e7d32;
+    }
+
+    .badge-sold {
+        background: #ffebee;
+        color: #c62828;
+    }
+
+    .badge-reserved {
+        background: #fff8e1;
+        color: #f57c00;
+    }
+
+    .product-price {
+        font-size: 36px;
+        font-weight: 700;
+        color: #ff6a00;
+        margin-bottom: 25px;
+    }
+
+    .product-description {
+        margin-bottom: 25px;
+    }
+
+    .product-description h5 {
+        color: #333;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+
+    .product-description p {
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .product-location {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 25px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+
+    .location-icon {
+        color: #ff6a00;
+        font-size: 18px;
+    }
+
+    .product-meta {
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #f0f0f0;
+    }
+
+    .product-actions {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .action-btn {
+        flex: 1;
+        padding: 15px 20px;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .action-btn-primary {
+        background: #ff6a00;
+        color: white;
+    }
+
+    .action-btn-primary:hover {
+        background: #e55a00;
+        text-decoration: none;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .action-btn-secondary {
+        background: white;
+        color: #ff6a00;
+        border: 2px solid #ff6a00;
+    }
+
+    .action-btn-secondary:hover {
+        background: #ff6a00;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+
+    .owner-alert {
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .unavailable-alert {
+        background: #fff3e0;
+        color: #f57c00;
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .login-prompt {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        color: #666;
+    }
+
+    .login-prompt a {
+        color: #ff6a00;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .login-prompt a:hover {
+        text-decoration: underline;
+    }
+
+    /* Contact Modal Styles */
+    .modal-content {
+        border-radius: 16px;
+        border: none;
+    }
+
+    .modal-header {
+        background: #ff6a00;
+        color: white;
+        border-radius: 16px 16px 0 0;
+    }
+
+    .modal-header .btn-close {
+        filter: invert(1);
+    }
+
+    .contact-form .form-group {
+        margin-bottom: 20px;
+    }
+
+    .contact-form label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+    }
+
+    .contact-form .form-control {
+        border-radius: 8px;
+        border: 2px solid #f0f0f0;
+        padding: 12px;
+        transition: border-color 0.3s ease;
+    }
+
+    .contact-form .form-control:focus {
+        border-color: #ff6a00;
+        box-shadow: 0 0 0 0.2rem rgba(255, 106, 0, 0.25);
+    }
+
+    .back-button {
+        background: white;
+        color: #666;
+        border: 2px solid #ddd;
+        padding: 12px 20px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .back-button:hover {
+        background: #f8f9fa;
+        border-color: #ff6a00;
+        color: #ff6a00;
+        text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+        .product-detail-page {
+            padding: 20px 0;
+        }
+
+        .product-container {
+            padding: 0 15px;
+        }
+
+        .product-content {
+            padding: 20px;
+        }
+
+        .product-title {
+            font-size: 24px;
+        }
+
+        .product-price {
+            font-size: 28px;
+        }
+
+        .product-actions {
+            flex-direction: column;
+        }
+
+        .product-header {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .like-button {
+            align-self: flex-end;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="product-detail-page">
+    <div class="product-container">
+        <!-- Back Button -->
+        <div style="margin-bottom: 20px;">
+            <a href="{% url 'products' %}" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                Back to Products
+            </a>
+        </div>
+
+        <!-- Product Card -->
+        <div class="product-card">
+            <!-- Product Image -->
+            <div class="product-image-section">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.title }}" class="product-main-image">
+                {% else %}
+                    <div class="product-image-placeholder">
+                        <i class="fas fa-image"></i> No Image Available
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Product Content -->
+            <div class="product-content">
+                <!-- Product Header with Like Button -->
+                <div class="product-header">
+                    <h1 class="product-title">{{ product.title }}</h1>
+                    {% if user.is_authenticated and user != product.seller %}
+                        <button class="like-button {% if user_liked %}liked{% endif %}" 
+                                onclick="toggleLike({{ product.id }})" 
+                                id="like-btn-{{ product.id }}">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    {% endif %}
+                </div>
+
+                <!-- Seller Info -->
+                <div class="seller-info">
+                    <div class="seller-avatar">
+                        {{ product.seller.first_name.0|default:product.seller.username.0|upper }}
+                    </div>
+                    <div class="seller-details">
+                        <h6>{{ product.seller.first_name|default:product.seller.username }}</h6>
+                        <p>Seller • Member since {{ product.seller.date_joined|date:"Y" }}</p>
+                    </div>
+                </div>
+
+                <!-- Product Badges -->
+                <div class="product-badges">
+                    <span class="product-badge badge-category">{{ product.category.name }}</span>
+                    <span class="product-badge badge-condition">{{ product.condition|title }}</span>
+                    <span class="product-badge badge-{{ product.status }}">{{ product.status|title }}</span>
+                </div>
+
+                <!-- Price -->
+                <div class="product-price">${{ product.price }}</div>
+
+                <!-- Description -->
+                <div class="product-description">
+                    <h5>Description</h5>
+                    <p>{{ product.description|linebreaks }}</p>
+                </div>
+
+                <!-- Location -->
+                <div class="product-location">
+                    <i class="fas fa-map-marker-alt location-icon"></i>
+                    <div>
+                        <strong>Meeting Location:</strong> {{ product.location }}
+                    </div>
+                </div>
+
+                <!-- Product Meta -->
+                <div class="product-meta">
+                    Listed {{ product.created_at|timesince }} ago
+                    {% if product.updated_at != product.created_at %}
+                        • Updated {{ product.updated_at|timesince }} ago
+                    {% endif %}
+                </div>
+
+                <!-- Actions -->
+                {% if user.is_authenticated %}
+                    {% if user != product.seller and product.status == 'available' %}
+                        <div class="product-actions">
+                            <button class="action-btn action-btn-primary" data-bs-toggle="modal" data-bs-target="#contactModal">
+                                <i class="fas fa-envelope"></i>
+                                Contact Seller
+                            </button>
+                            <a href="{% url 'add_to_cart' product.id %}" class="action-btn action-btn-secondary">
+                                <i class="fas fa-cart-plus"></i>
+                                Add to Cart
+                            </a>
+                        </div>
+                    {% elif user == product.seller %}
+                        <div class="owner-alert">
+                            <i class="fas fa-info-circle"></i>
+                            This is your listing
+                        </div>
+                        <div class="product-actions">
+                            <button class="action-btn action-btn-primary">
+                                <i class="fas fa-edit"></i>
+                                Edit Listing
+                            </button>
+                            <button class="action-btn action-btn-secondary">
+                                <i class="fas fa-trash"></i>
+                                Delete Listing
+                            </button>
+                        </div>
+                    {% else %}
+                        <div class="unavailable-alert">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            This item is {{ product.status }}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="login-prompt">
+                        <p><a href="{% url 'login' %}">Login</a> to contact the seller or add items to your cart</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Seller Modal -->
+{% if user.is_authenticated and user != product.seller %}
+<div class="modal fade" id="contactModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Contact Seller</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'contact_seller' product.id %}" class="contact-form">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="message_type">Message Type</label>
+                        <select class="form-control" id="message_type" name="message_type" required>
+                            <option value="inquiry">General Inquiry</option>
+                            <option value="offer">Price Offer</option>
+                            <option value="general">General Message</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <input type="text" class="form-control" id="subject" name="subject" 
+                               placeholder="Enter message subject" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="content">Message</label>
+                        <textarea class="form-control" id="content" name="content" rows="4" 
+                                  placeholder="Write your message here..." required></textarea>
+                    </div>
+
+                    <div class="form-group" id="offer-price-group" style="display: none;">
+                        <label for="offered_price">Your Offer ($)</label>
+                        <input type="number" class="form-control" id="offered_price" name="offered_price" 
+                               step="0.01" min="0" placeholder="Enter your offer">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="background: #ff6a00; border-color: #ff6a00;">
+                        <i class="fas fa-paper-plane"></i> Send Message
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+// Toggle like functionality
+function toggleLike(productId) {
+    fetch(`/toggle-like/${productId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        const likeBtn = document.getElementById(`like-btn-${productId}`);
+        if (data.liked) {
+            likeBtn.classList.add('liked');
+        } else {
+            likeBtn.classList.remove('liked');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// Show/hide offer price field based on message type
+document.getElementById('message_type').addEventListener('change', function() {
+    const offerGroup = document.getElementById('offer-price-group');
+    if (this.value === 'offer') {
+        offerGroup.style.display = 'block';
+        document.getElementById('offered_price').required = true;
+    } else {
+        offerGroup.style.display = 'none';
+        document.getElementById('offered_price').required = false;
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Products - University Local Market{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/products.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <!-- Categories Header Navigation -->
+    <div class="categories-header">
+        <nav class="categories-nav">
+            <a href="?category=" class="category-tab {% if not selected_category %}active{% endif %}">
+                All Categories
+            </a>
+            {% for category in categories %}
+                <a href="?category={{ category.id }}" 
+                   class="category-tab {% if selected_category == category.id|stringformat:'s' %}active{% endif %}">
+                    {{ category.name }}
+                </a>
+            {% endfor %}
+        </nav>
+    </div>
+
+    <!-- Main Layout Grid -->
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Categories Section -->
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Categories</h3>
+                <ul class="category-list">
+                    <li class="category-item">
+                        <a href="?category=" class="category-link {% if not selected_category %}active{% endif %}">
+                            <span>
+                                <i class="fas fa-th-large category-icon"></i>
+                                All Products
+                            </span>
+                            <span class="category-count">{{ products.count }}</span>
+                        </a>
+                    </li>
+                    {% for category in categories %}
+                    <li class="category-item">
+                        <a href="?category={{ category.id }}" 
+                           class="category-link {% if selected_category == category.id|stringformat:'s' %}active{% endif %}">
+                            <span>
+                                <i class="fas fa-tag category-icon"></i>
+                                {{ category.name }}
+                            </span>
+                            <span class="category-count">{{ category.products.count }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+
+        </aside>
+
+        <!-- Content Area -->
+        <main class="content-area">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <div class="results-count">
+                        {% if products %}
+                            {{ products|length }} products found
+                        {% else %}
+                            No products found
+                        {% endif %}
+                    </div>
+                    <div class="view-toggle">
+                        <button class="view-btn active">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button class="view-btn">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="toolbar-right">
+                    <!-- Price Filter -->
+                    <div class="toolbar-price-filter">
+                        <label class="sort-label">Price Range:</label>
+                        <form method="GET" class="price-filter-toolbar">
+                            {% if selected_category %}
+                                <input type="hidden" name="category" value="{{ selected_category }}">
+                            {% endif %}
+                            {% if request.GET.sort %}
+                                <input type="hidden" name="sort" value="{{ request.GET.sort }}">
+                            {% endif %}
+                            <input type="number" name="min_price" placeholder="Min" 
+                                   class="price-input-toolbar" value="{{ request.GET.min_price }}">
+                            <span class="price-separator">-</span>
+                            <input type="number" name="max_price" placeholder="Max" 
+                                   class="price-input-toolbar" value="{{ request.GET.max_price }}">
+                            <button type="submit" class="filter-btn-toolbar">Go</button>
+                        </form>
+                    </div>
+                    
+                    <!-- Sort Filter -->
+                    <div class="toolbar-sort">
+                        <label class="sort-label">Sort by:</label>
+                        <form method="GET" style="display: inline;">
+                            {% if selected_category %}
+                                <input type="hidden" name="category" value="{{ selected_category }}">
+                            {% endif %}
+                            {% if request.GET.min_price %}
+                                <input type="hidden" name="min_price" value="{{ request.GET.min_price }}">
+                            {% endif %}
+                            {% if request.GET.max_price %}
+                                <input type="hidden" name="max_price" value="{{ request.GET.max_price }}">
+                            {% endif %}
+                            <select name="sort" class="sort-select" onchange="this.form.submit()">
+                                <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>
+                                    Newest First
+                                </option>
+                                <option value="price_low" {% if request.GET.sort == 'price_low' %}selected{% endif %}>
+                                    Price: Low to High
+                                </option>
+                                <option value="price_high" {% if request.GET.sort == 'price_high' %}selected{% endif %}>
+                                    Price: High to Low
+                                </option>
+                                <option value="popular" {% if request.GET.sort == 'popular' %}selected{% endif %}>
+                                    Most Popular
+                                </option>
+                            </select>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="products-grid">
+                {% if products %}
+                    {% for product in products %}
+                    <div class="product-card">
+                        <!-- Product Image -->
+                        <div class="product-image-container">
+                            {% if product.images.first %}
+                                <img src="{{ product.images.first.image.url }}" 
+                                     alt="{{ product.title }}" class="product-image">
+                            {% else %}
+                                <img src="{% static 'images/no-image.png' %}" 
+                                     alt="No image available" class="product-image">
+                            {% endif %}
+                            
+                            <!-- Product Badge -->
+                            {% if product.is_new %}
+                                <span class="product-badge badge-new">New</span>
+                            {% elif product.is_featured %}
+                                <span class="product-badge badge-hot">Hot</span>
+                            {% elif product.discount_percentage %}
+                                <span class="product-badge badge-sale">Sale</span>
+                            {% endif %}
+                            
+                            <!-- Product Actions -->
+                            <div class="product-actions">
+                                <button class="action-btn" title="Add to Wishlist">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                                <button class="action-btn" title="Quick View">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn" title="Compare">
+                                    <i class="fas fa-balance-scale"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Product Info -->
+                        <div class="product-info">
+                            <div class="product-category">{{ product.category.name }}</div>
+                            <h3 class="product-title">
+                                <a href="{% url 'product_detail' product.id %}" style="text-decoration: none; color: inherit;">
+                                    {{ product.title }}
+                                </a>
+                            </h3>
+                            
+                            <div class="product-price">
+                                <span class="current-price">${{ product.price }}</span>
+                                {% if product.original_price and product.original_price != product.price %}
+                                    <span class="original-price">${{ product.original_price }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="product-meta">
+                                <span class="moq">MOQ: {{ product.minimum_order_quantity|default:"1" }}</span>
+                                <span class="rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </span>
+                            </div>
+                            
+                            <!-- Supplier Info -->
+                            <div class="product-supplier">
+                                {% if product.seller.profile_picture %}
+                                    <img src="{{ product.seller.profile_picture.url }}" 
+                                         alt="{{ product.seller.username }}" class="supplier-avatar">
+                                {% else %}
+                                    <img src="{% static 'images/default-avatar.png' %}" 
+                                         alt="Default Avatar" class="supplier-avatar">
+                                {% endif %}
+                                <div class="supplier-info">
+                                    <div class="supplier-name">{{ product.seller.username }}</div>
+                                    <div class="supplier-rating">
+                                        <i class="fas fa-star"></i>
+                                        <span>4.5</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Contact Button -->
+                            <button class="contact-btn">
+                                <i class="fas fa-envelope"></i>
+                                Contact Supplier
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-products">
+                        <div class="no-products-icon">
+                            <i class="fas fa-box-open"></i>
+                        </div>
+                        <h3>No products found</h3>
+                        <p>Try adjusting your filters or browse different categories.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // View toggle functionality
+    const viewBtns = document.querySelectorAll('.view-btn');
+    viewBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            viewBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // Wishlist functionality
+    const wishlistBtns = document.querySelectorAll('.action-btn');
+    wishlistBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const icon = this.querySelector('i');
+            if (icon.classList.contains('far')) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                this.style.background = '#ff6a00';
+                this.style.color = '#fff';
+            } else if (icon.classList.contains('fa-heart')) {
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                this.style.background = 'rgba(255,255,255,0.9)';
+                this.style.color = '#666';
+            }
+        });
+    });
+
+    // Contact supplier functionality
+    const contactBtns = document.querySelectorAll('.contact-btn');
+    contactBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Add your contact supplier logic here
+            alert('Contact supplier functionality would be implemented here');
+        });
+    });
+});
+</script>
+{% endblock %}

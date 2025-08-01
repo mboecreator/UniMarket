@@ -1,0 +1,428 @@
+{% extends 'base.html' %}
+
+{% block title %}Messages - Seller Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .messages-page {
+        background: #f8f8f8;
+        min-height: calc(100vh - 120px);
+        padding: 20px;
+    }
+
+    .messages-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .messages-header {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .messages-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+    }
+
+    .back-btn {
+        padding: 10px 20px;
+        background: #ff6a00;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .back-btn:hover {
+        background: #e55a00;
+        text-decoration: none;
+        color: white;
+    }
+
+    .messages-list {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .message-item {
+        padding: 20px 25px;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.2s ease;
+    }
+
+    .message-item:hover {
+        background: #f8f9fa;
+    }
+
+    .message-item:last-child {
+        border-bottom: none;
+    }
+
+    .message-item.unread {
+        background: #fff8f0;
+        border-left: 4px solid #ff6a00;
+    }
+
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+    }
+
+    .message-sender-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .sender-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff6a00, #e55a00);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .sender-details {
+        flex: 1;
+    }
+
+    .sender-name {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 4px;
+    }
+
+    .message-type {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+
+    .message-type.inquiry {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .message-type.offer {
+        background: #e8f5e8;
+        color: #2e7d32;
+    }
+
+    .message-type.general {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+
+    .message-meta {
+        text-align: right;
+        color: #666;
+        font-size: 14px;
+    }
+
+    .message-time {
+        margin-bottom: 4px;
+    }
+
+    .message-status {
+        font-size: 12px;
+        color: #999;
+    }
+
+    .message-content {
+        margin-bottom: 15px;
+    }
+
+    .message-subject {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 16px;
+    }
+
+    .message-text {
+        color: #555;
+        line-height: 1.5;
+        margin-bottom: 12px;
+    }
+
+    .message-product {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+
+    .product-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .product-image-placeholder {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        background: #e0e0e0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+        font-size: 12px;
+    }
+
+    .product-info {
+        flex: 1;
+    }
+
+    .product-title {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 4px;
+    }
+
+    .product-price {
+        color: #ff6a00;
+        font-weight: 600;
+    }
+
+    .offered-price {
+        background: #e8f5e8;
+        color: #2e7d32;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        display: inline-block;
+        margin-top: 8px;
+    }
+
+    .message-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .message-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .message-btn-primary {
+        background: #ff6a00;
+        color: white;
+    }
+
+    .message-btn-primary:hover {
+        background: #e55a00;
+        text-decoration: none;
+        color: white;
+    }
+
+    .message-btn-secondary {
+        background: white;
+        color: #666;
+        border: 1px solid #ddd;
+    }
+
+    .message-btn-secondary:hover {
+        background: #f8f9fa;
+        text-decoration: none;
+        color: #333;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+    }
+
+    .empty-state-icon {
+        font-size: 64px;
+        color: #ddd;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        font-size: 20px;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .unread-indicator {
+        width: 8px;
+        height: 8px;
+        background: #ff6a00;
+        border-radius: 50%;
+        margin-left: 8px;
+    }
+
+    @media (max-width: 768px) {
+        .messages-page {
+            padding: 15px;
+        }
+
+        .messages-header {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .message-item {
+            padding: 15px 20px;
+        }
+
+        .message-header {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message-meta {
+            text-align: left;
+        }
+
+        .message-actions {
+            flex-direction: column;
+        }
+
+        .message-btn {
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="messages-page">
+    <div class="messages-container">
+        <!-- Messages Header -->
+        <div class="messages-header">
+            <h1 class="messages-title">Messages</h1>
+            <a href="{% url 'seller_dashboard' %}" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Messages List -->
+        <div class="messages-list">
+            {% if messages %}
+                {% for message in messages %}
+                <div class="message-item {% if not message.is_read %}unread{% endif %}">
+                    <div class="message-header">
+                        <div class="message-sender-info">
+                            <div class="sender-avatar">
+                                {{ message.sender.first_name.0|default:message.sender.username.0|upper }}
+                            </div>
+                            <div class="sender-details">
+                                <div class="sender-name">
+                                    {{ message.sender.first_name|default:message.sender.username }}
+                                    {% if not message.is_read %}
+                                        <span class="unread-indicator"></span>
+                                    {% endif %}
+                                </div>
+                                <span class="message-type {{ message.message_type }}">
+                                    {{ message.get_message_type_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="message-meta">
+                            <div class="message-time">{{ message.created_at|timesince }} ago</div>
+                            <div class="message-status">
+                                {% if message.is_replied %}
+                                    <i class="fas fa-reply"></i> Replied
+                                {% else %}
+                                    <i class="fas fa-clock"></i> Pending
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="message-content">
+                        <div class="message-subject">{{ message.subject }}</div>
+                        <div class="message-text">{{ message.content|truncatewords:30 }}</div>
+
+                        {% if message.product %}
+                        <div class="message-product">
+                            {% if message.product.image %}
+                                <img src="{{ message.product.image.url }}" alt="{{ message.product.title }}" class="product-image">
+                            {% else %}
+                                <div class="product-image-placeholder">No Image</div>
+                            {% endif %}
+                            <div class="product-info">
+                                <div class="product-title">{{ message.product.title }}</div>
+                                <div class="product-price">${{ message.product.price }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if message.offered_price %}
+                        <div class="offered-price">
+                            <i class="fas fa-tag"></i> Offered Price: ${{ message.offered_price }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="message-actions">
+                        <a href="#" class="message-btn message-btn-primary">
+                            <i class="fas fa-reply"></i>
+                            Reply
+                        </a>
+                        {% if message.product %}
+                        <a href="{% url 'product_detail' message.product.id %}" class="message-btn message-btn-secondary">
+                            <i class="fas fa-eye"></i>
+                            View Product
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-inbox"></i>
+                    </div>
+                    <h3>No messages yet</h3>
+                    <p>When buyers contact you about your products, their messages will appear here.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CampusConnect - University Local Market{% endblock %}</title>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Your custom styles -->
+    <style>
+        /* Root Variables */
+        :root {
+            --primary-color: #FF9900;
+            --secondary-color: #34a853;
+            --dark-color: #333;
+            --light-color: #f8f9fa;
+            --gray-color: #6c757d;
+            --light-gray-color: #e9ecef;
+            --border-color: #dee2e6;
+            --border-radius: 8px;
+            --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: #f5f5f5;
+        }
+
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation Styles */
+        .navbar {
+            background-color: white;
+            padding: 12px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #e6e6e6;
+        }
+
+        .navbar-container {
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar-logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-logo h1 {
+            color: var(--primary-color);
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .navbar-logo a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .navbar-logo .menu-icon {
+            font-size: 20px;
+            color: #FF6A00;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .navbar-search {
+            display: flex;
+            flex: 1;
+            max-width: 600px;
+            margin: 0 30px;
+            position: relative;
+        }
+
+        .navbar-search form {
+            display: flex;
+            width: 100%;
+            border: 2px solid #ff6a00;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .navbar-search input {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background: white;
+        }
+
+        .navbar-search input::placeholder {
+            color: #999;
+        }
+
+        .navbar-search button {
+            padding: 10px 20px;
+            background-color: #FF6A00;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+        }
+
+        .navbar-search button:hover {
+            background-color: #e55a00;
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .marketplace-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .guest-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background-color: #ff6a00;
+            color: white;
+            border: 1px solid #ff6a00;
+        }
+
+        .btn-primary:hover {
+            background-color: #e55a00;
+            border-color: #e55a00;
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: #666;
+            border: 1px solid #d9d9d9;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f8f8f8;
+            border-color: #bbb;
+        }
+
+        /* User menu styles */
+        .user-menu {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .user-avatar img {
+            width: 36px !important;
+            height: 36px !important;
+            border-radius: 50% !important;
+            object-fit: cover !important;
+            border: 2px solid #ff6a00 !important;
+            transition: all 0.2s ease !important;
+            display: block !important;
+        }
+
+        .user-avatar-default {
+            width: 36px !important;
+            height: 36px !important;
+            border-radius: 50% !important;
+            background: linear-gradient(135deg, #ff6a00, #e55a00) !important;
+            border: 2px solid #ff6a00 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: white !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .user-menu:hover .user-avatar img,
+        .user-avatar:hover img,
+        .user-menu:hover .user-avatar-default,
+        .user-avatar:hover .user-avatar-default {
+            border-color: #e55a00 !important;
+            box-shadow: 0 4px 12px rgba(255, 106, 0, 0.4) !important;
+            transform: scale(1.05) !important;
+        }
+
+        .user-dropdown {
+            position: absolute !important;
+            top: calc(100% + 15px) !important;
+            right: 0 !important;
+            background: white !important;
+            border-radius: 8px !important;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+            min-width: 200px !important;
+            z-index: 9999 !important;
+            display: none !important;
+            overflow: hidden !important;
+            border: 1px solid #e6e6e6 !important;
+        }
+
+        .user-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: 15px;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border: 1px solid #e6e6e6;
+            border-bottom: none;
+            border-right: none;
+            transform: rotate(45deg);
+        }
+
+        .user-menu:hover .user-dropdown,
+        .user-dropdown.show {
+            display: block !important;
+            animation: dropdownFadeIn 0.2s ease-out;
+        }
+
+        @keyframes dropdownFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-dropdown a {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            padding: 12px 16px !important;
+            color: #333 !important;
+            text-decoration: none !important;
+            font-size: 14px !important;
+            transition: all 0.2s ease !important;
+            border-bottom: 1px solid #f5f5f5 !important;
+        }
+
+        .user-dropdown a:last-child {
+            border-bottom: none;
+        }
+
+        .user-dropdown a:hover {
+            background-color: #f8f8f8;
+            color: #ff6a00;
+        }
+
+        .user-dropdown a i {
+            width: 16px;
+            color: #666;
+            transition: color 0.2s ease;
+        }
+
+        .user-dropdown a:hover i {
+            color: #ff6a00;
+        }
+
+
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Full width container for specific pages */
+        .full-width-container {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Messages */
+        .alert {
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            border: 1px solid transparent;
+        }
+
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .alert-info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+
+        .alert-warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .footer p {
+            margin: 0;
+            color: var(--gray-color);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar-container {
+                flex-wrap: wrap;
+                padding: 0 15px;
+            }
+
+            .navbar-search {
+                order: 3;
+                width: 100%;
+                margin: 15px 0 0 0;
+                max-width: none;
+            }
+
+            .navbar-logo h1 {
+                font-size: 20px;
+            }
+
+            .btn {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+
+            .marketplace-actions {
+                gap: 10px;
+            }
+
+            .main-content {
+                padding: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-logo .menu-icon {
+                margin-right: 10px;
+            }
+
+            .navbar-logo h1 {
+                font-size: 18px;
+            }
+
+            .btn {
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+
+            .btn span {
+                display: none;
+            }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="app-container">
+        <nav class="navbar">
+            <div class="navbar-container">
+                <div class="navbar-logo">
+                    <a href="{% url 'home' %}">
+                        <i class="fas fa-bars menu-icon" title="Menu"></i>
+                        <h1>CampusConnect</h1>
+                    </a>
+                </div>
+                <div class="navbar-search">
+                    <form method="GET" action="{% url 'products' %}">
+                        <input type="text" name="search" id="searchInput" placeholder="Search products..." value="{{ request.GET.search }}">
+                        <button type="submit" title="Search"><i class="fas fa-search"></i></button>
+                    </form>
+                </div>
+                <div class="navbar-actions">
+                    {% if user.is_authenticated %}
+                        <div class="marketplace-actions">
+                            <a href="{% url 'products' %}" class="btn btn-primary"><i class="fas fa-store"></i> Browse Products</a>
+                            <a href="{% url 'cart' %}" class="btn btn-secondary" title="My Cart">
+                                <i class="fas fa-shopping-cart"></i> Cart
+                            </a>
+                            <div class="user-menu">
+                                <div class="user-avatar" id="profileLink" title="Profile">
+                                    {% if user.profile.profile_image %}
+                                        <img id="userAvatar" src="{{ user.profile.profile_image.url }}" alt="User Avatar">
+                                    {% else %}
+                                        <div class="user-avatar-default">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="user-dropdown">
+                                    <a href="{% url 'profile' %}"><i class="fas fa-user-circle"></i> My Profile</a>
+                                    {% if user.userprofile.can_post_products %}
+                                        <a href="{% url 'seller_dashboard' %}"><i class="fas fa-tachometer-alt"></i> Seller Dashboard</a>
+                                    {% else %}
+                                        <a href="{% url 'subscription_plans' %}"><i class="fas fa-crown"></i> Become a Seller</a>
+                                    {% endif %}
+                                    <a href="{% url 'cart' %}"><i class="fas fa-shopping-cart"></i> My Cart</a>
+                                    <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="guest-actions">
+                            <a href="{% url 'login' %}" class="btn btn-secondary"><i class="fas fa-sign-in-alt"></i> Login</a>
+                            <a href="{% url 'register' %}" class="btn btn-primary"><i class="fas fa-user-plus"></i> Sign Up</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+
+        {% if messages %}
+            <div class="container" style="padding-top: 20px;">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="main-content">
+            {% block content %}
+            {% endblock %}
+        </div>
+
+        <footer class="footer">
+            <div class="container">
+                <p>&copy; 2025 CampusConnect - University Local Market. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    <!-- User Dropdown JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userMenu = document.querySelector('.user-menu');
+            const userDropdown = document.querySelector('.user-dropdown');
+            const userAvatar = document.querySelector('.user-avatar');
+            
+            let hoverTimeout;
+            
+            if (userMenu && userDropdown && userAvatar) {
+                // Toggle dropdown on click
+                userAvatar.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (userDropdown.classList.contains('show')) {
+                        userDropdown.classList.remove('show');
+                    } else {
+                        userDropdown.classList.add('show');
+                    }
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userMenu.contains(e.target)) {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+                
+                // Show dropdown on hover
+                userMenu.addEventListener('mouseenter', function() {
+                    clearTimeout(hoverTimeout);
+                    userDropdown.classList.add('show');
+                });
+                
+                // Hide dropdown when leaving menu area
+                userMenu.addEventListener('mouseleave', function() {
+                    hoverTimeout = setTimeout(function() {
+                        userDropdown.classList.remove('show');
+                    }, 300);
+                });
+                
+                // Keep dropdown open when hovering over it
+                userDropdown.addEventListener('mouseenter', function() {
+                    clearTimeout(hoverTimeout);
+                    userDropdown.classList.add('show');
+                });
+                
+                // Hide dropdown when leaving dropdown area
+                userDropdown.addEventListener('mouseleave', function() {
+                    hoverTimeout = setTimeout(function() {
+                        userDropdown.classList.remove('show');
+                    }, 300);
+                });
+            }
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

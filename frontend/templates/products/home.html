@@ -1,0 +1,403 @@
+{% extends 'base.html' %}
+
+{% block title %}CampusConnect - University Local Market{% endblock %}
+
+{% block extra_css %}
+<style>
+    .home-page {
+        background: #f8f8f8;
+        min-height: calc(100vh - 120px);
+    }
+
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #ff6a00, #e55a00);
+        color: white;
+        padding: 80px 0 100px 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: #f8f8f8;
+        border-radius: 60px 60px 0 0;
+    }
+
+    .hero-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 20px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-title {
+        font-size: 48px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        line-height: 1.2;
+    }
+
+    .hero-subtitle {
+        font-size: 20px;
+        font-weight: 300;
+        margin-bottom: 40px;
+        opacity: 0.95;
+        line-height: 1.4;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .hero-btn {
+        padding: 16px 32px;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 50px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 180px;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .hero-btn-primary {
+        background: white;
+        color: #ff6a00;
+    }
+
+    .hero-btn-primary:hover {
+        background: #f5f5f5;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+        text-decoration: none;
+        color: #e55a00;
+    }
+
+    .hero-btn-secondary {
+        background: rgba(255,255,255,0.15);
+        color: white;
+        border: 2px solid rgba(255,255,255,0.3);
+    }
+
+    .hero-btn-secondary:hover {
+        background: rgba(255,255,255,0.25);
+        border-color: rgba(255,255,255,0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+        text-decoration: none;
+        color: white;
+    }
+
+    /* Features Section */
+    .features-section {
+        padding: 80px 0;
+        background: white;
+    }
+
+    .features-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 20px;
+        text-align: center;
+    }
+
+    .features-title {
+        font-size: 32px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 60px;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 40px;
+    }
+
+    .feature-item {
+        text-align: center;
+        padding: 30px 20px;
+    }
+
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #ff6a00, #e55a00);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px auto;
+        color: white;
+        font-size: 32px;
+        box-shadow: 0 4px 15px rgba(255, 106, 0, 0.3);
+    }
+
+    .feature-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 12px;
+    }
+
+    .feature-description {
+        font-size: 16px;
+        color: #666;
+        line-height: 1.5;
+    }
+
+    /* CTA Section */
+    .cta-section {
+        padding: 60px 0;
+        background: #f8f8f8;
+        text-align: center;
+    }
+
+    .cta-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .cta-title {
+        font-size: 28px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 16px;
+    }
+
+    .cta-subtitle {
+        font-size: 18px;
+        color: #666;
+        margin-bottom: 30px;
+        line-height: 1.4;
+    }
+
+    .cta-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .cta-btn {
+        padding: 14px 28px;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .cta-btn-primary {
+        background: #ff6a00;
+        color: white;
+        box-shadow: 0 2px 8px rgba(255, 106, 0, 0.3);
+    }
+
+    .cta-btn-primary:hover {
+        background: #e55a00;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 106, 0, 0.4);
+        text-decoration: none;
+        color: white;
+    }
+
+    .cta-btn-secondary {
+        background: white;
+        color: #ff6a00;
+        border: 2px solid #ff6a00;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .cta-btn-secondary:hover {
+        background: #ff6a00;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 106, 0, 0.3);
+        text-decoration: none;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 36px;
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+        }
+
+        .hero-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero-btn {
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .features-section {
+            padding: 60px 0;
+        }
+
+        .features-title {
+            font-size: 28px;
+            margin-bottom: 40px;
+        }
+
+        .features-grid {
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        .cta-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .cta-btn {
+            width: 100%;
+            max-width: 250px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .hero-section {
+            padding: 60px 0 80px 0;
+        }
+
+        .hero-title {
+            font-size: 32px;
+        }
+
+        .hero-subtitle {
+            font-size: 16px;
+        }
+
+        .features-section {
+            padding: 50px 0;
+        }
+
+        .cta-section {
+            padding: 50px 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="home-page">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <h1 class="hero-title">Your Campus Marketplace</h1>
+            <p class="hero-subtitle">Buy and sell with students and faculty in your university community</p>
+            <div class="hero-actions">
+                <a href="{% url 'products' %}" class="hero-btn hero-btn-primary">
+                    <i class="fas fa-search"></i>
+                    Browse Products
+                </a>
+                {% if not user.is_authenticated %}
+                    <a href="{% url 'register' %}" class="hero-btn hero-btn-secondary">
+                        <i class="fas fa-user-plus"></i>
+                        Join Now
+                    </a>
+                {% else %}
+                    <a href="{% url 'profile' %}" class="hero-btn hero-btn-secondary">
+                        <i class="fas fa-user"></i>
+                        My Profile
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="features-container">
+            <h2 class="features-title">Why Choose CampusConnect?</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <h3 class="feature-title">Campus Community</h3>
+                    <p class="feature-description">Connect with students and faculty in your university for safe, local transactions</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3 class="feature-title">Easy Trading</h3>
+                    <p class="feature-description">Simple platform to buy and sell textbooks, electronics, furniture, and more</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="feature-title">Safe & Secure</h3>
+                    <p class="feature-description">University-verified users ensure trustworthy transactions within your campus</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="cta-section">
+        <div class="cta-container">
+            <h2 class="cta-title">Ready to Get Started?</h2>
+            <p class="cta-subtitle">Join thousands of students already using CampusConnect</p>
+            <div class="cta-actions">
+                {% if not user.is_authenticated %}
+                    <a href="{% url 'login' %}" class="cta-btn cta-btn-primary">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Sign In
+                    </a>
+                    <a href="{% url 'register' %}" class="cta-btn cta-btn-secondary">
+                        <i class="fas fa-user-plus"></i>
+                        Sign Up
+                    </a>
+                {% else %}
+                    <a href="{% url 'products' %}" class="cta-btn cta-btn-primary">
+                        <i class="fas fa-shopping-bag"></i>
+                        Start Shopping
+                    </a>
+                    {% if user.userprofile.can_post_products %}
+                        <a href="{% url 'seller_dashboard' %}" class="cta-btn cta-btn-secondary">
+                            <i class="fas fa-plus"></i>
+                            Sell Something
+                        </a>
+                    {% else %}
+                        <a href="{% url 'subscription_plans' %}" class="cta-btn cta-btn-secondary">
+                            <i class="fas fa-crown"></i>
+                            Become a Seller
+                        </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

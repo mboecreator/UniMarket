@@ -1,0 +1,773 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Messages - University Local Market{% endblock %}
+
+{% block extra_css %}
+<style>
+    .messages-page {
+        background: #f0f2f5;
+        min-height: calc(100vh - 120px);
+        padding: 0;
+    }
+
+    .messages-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        height: calc(100vh - 120px);
+        display: flex;
+        background: white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+
+    /* Sidebar */
+    .messages-sidebar {
+        width: 380px;
+        border-right: 1px solid #e4e6ea;
+        display: flex;
+        flex-direction: column;
+        background: white;
+    }
+
+    .sidebar-header {
+        padding: 20px;
+        border-bottom: 1px solid #e4e6ea;
+        background: #f8f9fa;
+    }
+
+    .sidebar-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #1c1e21;
+        margin: 0;
+    }
+
+    .message-tabs {
+        display: flex;
+        gap: 5px;
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: 8px 12px;
+        border: none;
+        background: transparent;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #65676b;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+        background: #1877f2;
+        color: white;
+    }
+
+    .tab-btn:hover:not(.active) {
+        background: #f2f3f5;
+    }
+
+    .messages-list {
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .message-item {
+        padding: 12px 20px;
+        border-bottom: 1px solid #f0f2f5;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        position: relative;
+    }
+
+    .message-item:hover {
+        background: #f8f9fa;
+    }
+
+    .message-item.active {
+        background: #e7f3ff;
+        border-right: 3px solid #1877f2;
+    }
+
+    .message-item.unread {
+        background: #f0f8ff;
+    }
+
+    .message-item.unread::before {
+        content: '';
+        position: absolute;
+        left: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 4px;
+        background: #1877f2;
+        border-radius: 50%;
+    }
+
+    .message-preview {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .sender-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1877f2, #42a5f5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 18px;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .message-preview-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .message-preview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+    }
+
+    .sender-name {
+        font-weight: 600;
+        color: #1c1e21;
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .message-time {
+        font-size: 12px;
+        color: #65676b;
+        white-space: nowrap;
+    }
+
+    .message-preview-text {
+        font-size: 13px;
+        color: #65676b;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .message-type-badge {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: 10px;
+        font-weight: 500;
+        text-transform: uppercase;
+        margin-top: 4px;
+    }
+
+    .badge-inquiry {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .badge-offer {
+        background: #e8f5e8;
+        color: #2e7d32;
+    }
+
+    .badge-general {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+
+    /* Main Content */
+    .messages-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #fafbfc;
+    }
+
+    .message-detail-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #e4e6ea;
+        background: white;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .detail-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1877f2, #42a5f5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .detail-info h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #1c1e21;
+    }
+
+    .detail-info p {
+        margin: 0;
+        font-size: 12px;
+        color: #65676b;
+    }
+
+    .message-detail-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+    }
+
+    /* Chat Bubble Styles */
+    .chat-bubble {
+        max-width: 70%;
+        margin-bottom: 16px;
+        position: relative;
+    }
+
+    .chat-bubble.received {
+        align-self: flex-start;
+    }
+
+    .chat-bubble.sent {
+        align-self: flex-end;
+        margin-left: auto;
+    }
+
+    .bubble-content {
+        background: white;
+        border-radius: 18px;
+        padding: 12px 16px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        position: relative;
+    }
+
+    .chat-bubble.received .bubble-content {
+        background: white;
+        border-bottom-left-radius: 4px;
+    }
+
+    .chat-bubble.sent .bubble-content {
+        background: #dcf8c6;
+        border-bottom-right-radius: 4px;
+    }
+
+    .message-subject {
+        font-weight: 600;
+        color: #1c1e21;
+        margin-bottom: 8px;
+        font-size: 15px;
+    }
+
+    .message-text {
+        color: #1c1e21;
+        line-height: 1.4;
+        margin-bottom: 12px;
+    }
+
+    .message-product-card {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 12px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 12px;
+        border: 1px solid #e4e6ea;
+    }
+
+    .product-thumb {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        object-fit: cover;
+        background: #e4e6ea;
+    }
+
+    .product-thumb-placeholder {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        background: #e4e6ea;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #65676b;
+        font-size: 10px;
+    }
+
+    .product-card-info h6 {
+        margin: 0 0 4px 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: #1c1e21;
+    }
+
+    .product-card-price {
+        font-size: 12px;
+        color: #1877f2;
+        font-weight: 600;
+    }
+
+    .offered-price-badge {
+        background: #e8f5e8;
+        color: #2e7d32;
+        padding: 8px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .message-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .action-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .action-btn-primary {
+        background: #1877f2;
+        color: white;
+    }
+
+    .action-btn-primary:hover {
+        background: #166fe5;
+        text-decoration: none;
+        color: white;
+    }
+
+    .action-btn-secondary {
+        background: #f0f2f5;
+        color: #65676b;
+        border: 1px solid #e4e6ea;
+    }
+
+    .action-btn-secondary:hover {
+        background: #e4e6ea;
+        text-decoration: none;
+        color: #1c1e21;
+    }
+
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #65676b;
+        text-align: center;
+    }
+
+    .empty-state-icon {
+        font-size: 48px;
+        color: #bcc0c4;
+        margin-bottom: 16px;
+    }
+
+    .empty-state h3 {
+        font-size: 18px;
+        color: #1c1e21;
+        margin-bottom: 8px;
+    }
+
+    .empty-state p {
+        font-size: 14px;
+        color: #65676b;
+        max-width: 300px;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    @media (max-width: 768px) {
+        .messages-container {
+            flex-direction: column;
+            height: auto;
+            min-height: calc(100vh - 120px);
+        }
+
+        .messages-sidebar {
+            width: 100%;
+            max-height: 50vh;
+        }
+
+        .messages-main {
+            min-height: 50vh;
+        }
+
+        .message-item {
+            padding: 16px 20px;
+        }
+
+        .sender-avatar {
+            width: 36px;
+            height: 36px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="messages-page">
+    <div class="messages-container">
+        <!-- Sidebar -->
+        <div class="messages-sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">Messages</h2>
+                <div class="message-tabs">
+                    <button class="tab-btn active" onclick="showTab('received')">
+                        Received ({{ received_messages.count }})
+                    </button>
+                    <button class="tab-btn" onclick="showTab('sent')">
+                        Sent ({{ sent_messages.count }})
+                    </button>
+                </div>
+            </div>
+
+            <div class="search-container" style="padding: 12px 20px; border-bottom: 1px solid #e4e6ea; background: white;">
+                <input type="text" class="search-box" placeholder="Search messages..." id="messageSearch" style="width: 100%; padding: 10px 16px; border: 1px solid #e4e6ea; border-radius: 20px; font-size: 14px; background: #f0f2f5; outline: none; transition: all 0.2s ease;">
+            </div>
+
+            <!-- Received Messages List -->
+            <div id="received-list" class="messages-list tab-content active">
+                {% if received_messages %}
+                    {% for message in received_messages %}
+                    <div class="message-item {% if not message.is_read %}unread{% endif %}" onclick="showChatMessage('{{ message.id }}', 'received')">
+                        <div class="message-preview">
+                            <div class="sender-avatar">
+                                {{ message.sender.first_name.0|default:message.sender.username.0|upper }}
+                            </div>
+                            <div class="message-preview-content">
+                                <div class="message-preview-header">
+                                    <span class="sender-name">{{ message.sender.first_name|default:message.sender.username }}</span>
+                                    <span class="message-time">{{ message.created_at|timesince }}</span>
+                                </div>
+                                <div class="message-preview-text">{{ message.subject }}</div>
+                                <span class="message-type-badge badge-{{ message.message_type }}">
+                                    {{ message.get_message_type_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-inbox empty-state-icon"></i>
+                        <h3>No messages</h3>
+                        <p>You haven't received any messages yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Sent Messages List -->
+            <div id="sent-list" class="messages-list tab-content">
+                {% if sent_messages %}
+                    {% for message in sent_messages %}
+                    <div class="message-item" onclick="showChatMessage('{{ message.id }}', 'sent')">
+                        <div class="message-preview">
+                            <div class="sender-avatar">
+                                {{ message.recipient.first_name.0|default:message.recipient.username.0|upper }}
+                            </div>
+                            <div class="message-preview-content">
+                                <div class="message-preview-header">
+                                    <span class="sender-name">To: {{ message.recipient.first_name|default:message.recipient.username }}</span>
+                                    <span class="message-time">{{ message.created_at|timesince }}</span>
+                                </div>
+                                <div class="message-preview-text">{{ message.subject }}</div>
+                                <span class="message-type-badge badge-{{ message.message_type }}">
+                                    {{ message.get_message_type_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-paper-plane empty-state-icon"></i>
+                        <h3>No sent messages</h3>
+                        <p>You haven't sent any messages yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="messages-main">
+            <div id="message-detail" class="empty-state">
+                <i class="fas fa-comments empty-state-icon"></i>
+                <h3>Select a message</h3>
+                <p>Choose a message from the list to view its details.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden message details for JavaScript -->
+<div style="display: none;">
+    {% for message in received_messages %}
+    <div id="received-{{ message.id }}" class="message-data">
+        <div class="message-detail-header">
+            <div class="detail-avatar">
+                {{ message.sender.first_name.0|default:message.sender.username.0|upper }}
+            </div>
+            <div class="detail-info">
+                <h3>{{ message.sender.first_name|default:message.sender.username }}</h3>
+                <p>{{ message.created_at|date:"M d, Y H:i" }}</p>
+            </div>
+        </div>
+        <div class="message-detail-content">
+            <div class="chat-bubble received">
+                <div class="bubble-content">
+                    <div class="message-subject">{{ message.subject }}</div>
+                    <div class="message-text">{{ message.content|linebreaks }}</div>
+                
+                {% if message.product %}
+                <div class="message-product-card">
+                    {% if message.product.image %}
+                        <img src="{{ message.product.image.url }}" alt="{{ message.product.title }}" class="product-thumb">
+                    {% else %}
+                        <div class="product-thumb-placeholder">No Image</div>
+                    {% endif %}
+                    <div class="product-card-info">
+                        <h6>{{ message.product.title }}</h6>
+                        <div class="product-card-price">${{ message.product.price }}</div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if message.offered_price %}
+                <div class="offered-price-badge">
+                    <i class="fas fa-tag"></i> Offered: ${{ message.offered_price }}
+                </div>
+                {% endif %}
+
+                <div class="message-actions">
+                    {% if message.product %}
+                        <a href="{% url 'contact_seller' message.product.id %}" class="action-btn action-btn-primary">
+                            <i class="fas fa-reply"></i> Reply
+                        </a>
+                        <a href="{% url 'product_detail' message.product.id %}" class="action-btn action-btn-secondary">
+                            <i class="fas fa-eye"></i> View Product
+                        </a>
+                    {% endif %}
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% for message in sent_messages %}
+    <div id="sent-{{ message.id }}" class="message-data">
+        <div class="message-detail-header">
+            <div class="detail-avatar">
+                {{ message.recipient.first_name.0|default:message.recipient.username.0|upper }}
+            </div>
+            <div class="detail-info">
+                <h3>To: {{ message.recipient.first_name|default:message.recipient.username }}</h3>
+                <p>{{ message.created_at|date:"M d, Y H:i" }}</p>
+            </div>
+        </div>
+        <div class="message-detail-content">
+            <div class="chat-bubble received">
+                <div class="bubble-content">
+                    <div class="message-subject">{{ message.subject }}</div>
+                    <div class="message-text">{{ message.content|linebreaks }}</div>
+                
+                {% if message.product %}
+                <div class="message-product-card">
+                    {% if message.product.image %}
+                        <img src="{{ message.product.image.url }}" alt="{{ message.product.title }}" class="product-thumb">
+                    {% else %}
+                        <div class="product-thumb-placeholder">No Image</div>
+                    {% endif %}
+                    <div class="product-card-info">
+                        <h6>{{ message.product.title }}</h6>
+                        <div class="product-card-price">${{ message.product.price }}</div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if message.offered_price %}
+                <div class="offered-price-badge">
+                    <i class="fas fa-tag"></i> Offered: ${{ message.offered_price }}
+                </div>
+                {% endif %}
+
+                <div class="message-actions">
+                    {% if message.product %}
+                        <a href="{% url 'product_detail' message.product.id %}" class="action-btn action-btn-secondary">
+                            <i class="fas fa-eye"></i> View Product
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+function showTab(tab) {
+    // Update tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    document.getElementById(tab + '-list').classList.add('active');
+    
+    // Clear message detail
+    document.getElementById('message-detail').innerHTML = `
+        <div class="empty-state">
+            <i class="fas fa-comments empty-state-icon"></i>
+            <h3>Select a message</h3>
+            <p>Choose a message from the list to view its details.</p>
+        </div>
+    `;
+}
+
+function showChatMessage(messageId, type) {
+    try {
+        // Update active message item
+        document.querySelectorAll('.message-item').forEach(item => item.classList.remove('active'));
+        if (event && event.currentTarget) {
+            event.currentTarget.classList.add('active');
+        }
+        
+        // Show message detail
+        const messageDataId = type + '-' + messageId;
+        const messageData = document.getElementById(messageDataId);
+        const messageDetail = document.getElementById('message-detail');
+        
+        if (messageData && messageDetail) {
+            messageDetail.innerHTML = messageData.innerHTML;
+            
+            // Mark as read if it's a received message
+            if (type === 'received') {
+                markAsRead(messageId);
+            }
+        } else {
+            console.error('Message data or detail container not found');
+        }
+    } catch (error) {
+        console.error('Error showing chat message:', error);
+    }
+}
+
+function markAsRead(messageId) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrfToken) {
+        console.error('CSRF token not found');
+        return;
+    }
+    
+    fetch(`/messages/mark-read/${messageId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken.value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Remove unread styling
+            const messageItem = document.querySelector(`[onclick*="${messageId}"]`);
+            if (messageItem) {
+                messageItem.classList.remove('unread');
+            }
+        } else {
+            console.error('Failed to mark message as read:', data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error marking message as read:', error);
+    });
+}
+
+// Search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('messageSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const activeTab = document.querySelector('.tab-content.active');
+            const messageItems = activeTab.querySelectorAll('.message-item');
+            
+            messageItems.forEach(item => {
+                const senderName = item.querySelector('.sender-name').textContent.toLowerCase();
+                const messageText = item.querySelector('.message-preview-text').textContent.toLowerCase();
+                
+                if (senderName.includes(searchTerm) || messageText.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+        
+        // Focus search box on focus
+        searchInput.addEventListener('focus', function() {
+            this.style.background = 'white';
+            this.style.borderColor = '#1877f2';
+            this.style.boxShadow = '0 0 0 2px rgba(24, 119, 242, 0.1)';
+        });
+        
+        searchInput.addEventListener('blur', function() {
+            this.style.background = '#f0f2f5';
+            this.style.borderColor = '#e4e6ea';
+            this.style.boxShadow = 'none';
+        });
+    }
+});
+</script>
+{% endblock %}

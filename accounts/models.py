@@ -5,8 +5,8 @@ from datetime import timedelta
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    student_id = models.CharField(max_length=20, unique=True)
-    university = models.CharField(max_length=100)
+    student_id = models.CharField(max_length=20, blank=True, null=True)
+    university = models.CharField(max_length=100, blank=True)
     phone_number = models.CharField(max_length=15, blank=True)
     address = models.TextField(blank=True)
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
@@ -21,15 +21,21 @@ class UserProfile(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.student_id}"
+        return f"{self.user.username} - {self.student_id or 'No Student ID'}"
 
     def is_subscription_active(self):
         """Check if user has an active seller subscription"""
         if not self.subscription_active:
             return False
+        
+        # Check if subscription has expired
         if self.subscription_end_date and self.subscription_end_date < timezone.now():
-            self.subscription_active = False
-            self.save()
+            try:
+                self.subscription_active = False
+                self.save(update_fields=['subscription_active'])
+            except Exception as e:
+                # Log error but don't break the flow
+                print(f"Error updating subscription status: {e}")
             return False
         return True
 

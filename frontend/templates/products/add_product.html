@@ -1,0 +1,317 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add New Product - UniMarket{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/seller.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="seller-page">
+    <div class="seller-container">
+        <!-- Header Section -->
+        <div class="seller-header">
+            <div class="seller-header-content">
+                <h1 class="seller-title">
+                    <i class="fas fa-plus-circle"></i> Add New Product
+                </h1>
+                <p class="seller-subtitle">Create a new listing to sell your item to fellow students</p>
+            </div>
+        </div>
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'seller_dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Add Product</li>
+            </ol>
+        </nav>
+
+        <!-- Add Product Form -->
+        <div class="seller-form-card">
+            <div class="seller-form-header">
+                <h3><i class="fas fa-box"></i> Product Information</h3>
+                <small>Fill in all the details to create your product listing</small>
+            </div>
+            <div class="seller-form-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Product Information -->
+                        <div class="form-section">
+                            <h4 class="form-section-title">
+                                <i class="fas fa-info-circle"></i> Basic Information
+                            </h4>
+                            
+                            <div class="form-group">
+                                <label for="title" class="form-label">Product Title *</label>
+                                <input type="text" class="form-control" id="title" name="title" 
+                                       value="{{ form_data.title|default:'' }}" required maxlength="200"
+                                       placeholder="Enter a descriptive title for your product">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="category" class="form-label">Category *</label>
+                                        <select class="form-select" id="category" name="category" required>
+                                            <option value="">Select a category</option>
+                                            {% for category in categories %}
+                                                <option value="{{ category.id }}" 
+                                                        {% if form_data.category == category.id|stringformat:"s" %}selected{% endif %}>
+                                                    {{ category.name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="price" class="form-label">Price ($) *</label>
+                                        <input type="number" class="form-control" id="price" name="price" 
+                                               value="{{ form_data.price|default:'' }}" required min="0.01" step="0.01"
+                                               placeholder="0.00">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="condition" class="form-label">Condition *</label>
+                                        <select class="form-select" id="condition" name="condition" required>
+                                            <option value="new" {% if form_data.condition == 'new' %}selected{% endif %}>New</option>
+                                            <option value="like_new" {% if form_data.condition == 'like_new' %}selected{% endif %}>Like New</option>
+                                            <option value="good" {% if form_data.condition == 'good' or not form_data.condition %}selected{% endif %}>Good</option>
+                                            <option value="fair" {% if form_data.condition == 'fair' %}selected{% endif %}>Fair</option>
+                                            <option value="poor" {% if form_data.condition == 'poor' %}selected{% endif %}>Poor</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="location" class="form-label">Meeting Location *</label>
+                                        <input type="text" class="form-control" id="location" name="location" 
+                                               value="{{ form_data.location|default:'' }}" required maxlength="200"
+                                               placeholder="e.g., Library entrance, Student Center">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="description" class="form-label">Description *</label>
+                                <textarea class="form-control" id="description" name="description" rows="4" required
+                                          placeholder="Provide detailed information about your product, including any defects, usage history, etc.">{{ form_data.description|default:'' }}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Images Section -->
+                        <div class="form-section">
+                            <h4 class="form-section-title">
+                                <i class="fas fa-camera"></i> Product Images
+                            </h4>
+                            <div class="alert alert-info">
+                                <i class="fas fa-lightbulb"></i>
+                                High-quality images increase your chances of selling! Take photos in good lighting and show different angles.
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="image" class="form-label">Main Product Image *</label>
+                                        <div class="file-upload-area" onclick="document.getElementById('image').click()">
+                                            <div class="file-upload-icon">
+                                                <i class="fas fa-cloud-upload-alt"></i>
+                                            </div>
+                                            <div class="file-upload-text">Click to upload main image</div>
+                                            <div class="file-upload-hint">JPG, PNG, GIF up to 10MB</div>
+                                        </div>
+                                        <input type="file" class="form-control" id="image" name="image" accept="image/*" style="display: none;">
+                                        <div id="main-image-preview" class="mt-2"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="additional_images" class="form-label">Additional Images</label>
+                                        <div class="file-upload-area" onclick="document.getElementById('additional_images').click()">
+                                            <div class="file-upload-icon">
+                                                <i class="fas fa-images"></i>
+                                            </div>
+                                            <div class="file-upload-text">Click to upload more images</div>
+                                            <div class="file-upload-hint">Up to 5 additional photos</div>
+                                        </div>
+                                        <input type="file" class="form-control" id="additional_images" name="additional_images" 
+                                               accept="image/*" multiple style="display: none;">
+                                        <div id="additional-images-preview" class="additional-images mt-2"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information Section -->
+                        <div class="form-section">
+                            <h4 class="form-section-title">
+                                <i class="fas fa-address-book"></i> Contact Information
+                            </h4>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                This information will be shown to interested buyers. Leave blank to use your profile defaults.
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="seller_phone" class="form-label">Contact Phone</label>
+                                        <input type="tel" class="form-control" id="seller_phone" name="seller_phone" 
+                                               value="{{ form_data.seller_phone|default:initial_data.seller_phone }}" 
+                                               maxlength="15" placeholder="Your phone number">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="seller_email" class="form-label">Contact Email</label>
+                                        <input type="email" class="form-control" id="seller_email" name="seller_email" 
+                                               value="{{ form_data.seller_email|default:initial_data.seller_email }}" 
+                                               placeholder="Your email address">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="preferred_contact_method" class="form-label">Preferred Contact Method</label>
+                                <select class="form-select" id="preferred_contact_method" name="preferred_contact_method">
+                                    <option value="message" {% if form_data.preferred_contact_method == 'message' or not form_data.preferred_contact_method %}selected{% endif %}>In-app Message</option>
+                                    <option value="email" {% if form_data.preferred_contact_method == 'email' %}selected{% endif %}>Email</option>
+                                    <option value="phone" {% if form_data.preferred_contact_method == 'phone' %}selected{% endif %}>Phone</option>
+                                    <option value="any" {% if form_data.preferred_contact_method == 'any' %}selected{% endif %}>Any Method</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="form-actions" style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
+                            <a href="{% url 'seller_dashboard' %}" class="btn-seller-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn-seller-primary" id="submitBtn">
+                                <i class="fas fa-plus"></i> Post Product
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Enhanced file upload functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Main image upload
+    const mainImageInput = document.getElementById('image');
+    const mainImagePreview = document.getElementById('main-image-preview');
+    const mainUploadArea = document.querySelector('.file-upload-area');
+    
+    mainImageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                mainImagePreview.innerHTML = `
+                    <img src="${e.target.result}" class="image-preview" alt="Main product image">
+                `;
+                mainUploadArea.classList.add('has-file');
+                mainUploadArea.innerHTML = `
+                    <div class="file-upload-icon">
+                        <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
+                    </div>
+                    <div class="file-upload-text">Image uploaded successfully!</div>
+                    <div class="file-upload-hint">Click to change image</div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            mainImagePreview.innerHTML = '';
+            mainUploadArea.classList.remove('has-file');
+            resetMainUploadArea();
+        }
+    });
+    
+    // Additional images upload
+    const additionalImagesInput = document.getElementById('additional_images');
+    const additionalImagesPreview = document.getElementById('additional-images-preview');
+    
+    additionalImagesInput.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        additionalImagesPreview.innerHTML = '';
+        
+        files.slice(0, 5).forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgElement = document.createElement('img');
+                imgElement.src = e.target.result;
+                imgElement.className = 'additional-image-preview';
+                imgElement.alt = `Additional image ${index + 1}`;
+                additionalImagesPreview.appendChild(imgElement);
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        if (files.length > 0) {
+            const additionalUploadArea = document.querySelectorAll('.file-upload-area')[1];
+            additionalUploadArea.classList.add('has-file');
+            additionalUploadArea.innerHTML = `
+                <div class="file-upload-icon">
+                    <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
+                </div>
+                <div class="file-upload-text">${files.length} image(s) uploaded</div>
+                <div class="file-upload-hint">Click to change images</div>
+            `;
+        }
+    });
+    
+    // Form submission with loading state
+    const form = document.querySelector('form');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    form.addEventListener('submit', function(e) {
+        submitBtn.innerHTML = '<span class="spinner"></span> Posting Product...';
+        submitBtn.disabled = true;
+        submitBtn.classList.add('loading');
+    });
+    
+    // Form validation feedback
+    const requiredFields = document.querySelectorAll('[required]');
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', function() {
+            if (this.value.trim() === '') {
+                this.style.borderColor = 'var(--danger-color)';
+            } else {
+                this.style.borderColor = 'var(--success-color)';
+            }
+        });
+        
+        field.addEventListener('input', function() {
+            if (this.value.trim() !== '') {
+                this.style.borderColor = 'var(--border-color)';
+            }
+        });
+    });
+    
+    function resetMainUploadArea() {
+        const mainUploadArea = document.querySelector('.file-upload-area');
+        mainUploadArea.innerHTML = `
+            <div class="file-upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <div class="file-upload-text">Click to upload main image</div>
+            <div class="file-upload-hint">JPG, PNG, GIF up to 10MB</div>
+        `;
+    }
+});
+</script>
+{% endblock %}

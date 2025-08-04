@@ -1,0 +1,412 @@
+{% extends 'base.html' %}
+
+{% block title %}My Orders - University Local Market{% endblock %}
+
+{% block extra_css %}
+<style>
+    .orders-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f8f8f8;
+        min-height: calc(100vh - 120px);
+    }
+
+    .orders-header {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .orders-header h1 {
+        margin: 0;
+        font-size: 24px;
+        color: #333;
+        font-weight: 600;
+    }
+
+    .order-card {
+        background: white;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .order-header {
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .order-info {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .order-detail {
+        font-size: 14px;
+    }
+
+    .order-detail strong {
+        color: #333;
+    }
+
+    .order-status {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-confirmed {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-processing {
+        background: #cce5ff;
+        color: #004085;
+    }
+
+    .status-shipped {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+
+    .status-delivered {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .status-cancelled {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .order-items {
+        padding: 20px;
+    }
+
+    .order-item {
+        display: flex;
+        gap: 15px;
+        padding: 15px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .order-item:last-child {
+        border-bottom: none;
+    }
+
+    .item-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .item-placeholder {
+        width: 100%;
+        height: 100%;
+        background: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+        font-size: 12px;
+    }
+
+    .item-details {
+        flex: 1;
+    }
+
+    .item-name {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .item-meta {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 5px;
+    }
+
+    .item-price {
+        font-size: 14px;
+        color: #ff6a00;
+        font-weight: 600;
+    }
+
+    .order-summary {
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .order-total {
+        font-size: 18px;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .order-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: #ff6a00;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #e55a00;
+        text-decoration: none;
+        color: white;
+    }
+
+    .btn-secondary {
+        background: white;
+        color: #666;
+        border: 1px solid #d9d9d9;
+    }
+
+    .btn-secondary:hover {
+        background: #f8f8f8;
+        border-color: #bbb;
+        text-decoration: none;
+        color: #333;
+    }
+
+    .empty-orders {
+        background: white;
+        border-radius: 8px;
+        padding: 60px 20px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .empty-orders-icon {
+        font-size: 64px;
+        color: #d9d9d9;
+        margin-bottom: 20px;
+    }
+
+    .empty-orders h3 {
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .empty-orders p {
+        color: #666;
+        margin-bottom: 30px;
+    }
+
+    @media (max-width: 768px) {
+        .orders-page {
+            padding: 15px;
+        }
+
+        .order-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .order-info {
+            justify-content: space-between;
+        }
+
+        .order-item {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .item-image {
+            width: 100%;
+            height: 150px;
+        }
+
+        .order-summary {
+            flex-direction: column;
+            gap: 15px;
+            align-items: stretch;
+        }
+
+        .order-actions {
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="orders-page">
+    <div class="orders-header">
+        <h1>My Orders</h1>
+    </div>
+
+    {% if orders %}
+        {% for order in orders %}
+        <div class="order-card">
+            <div class="order-header">
+                <div class="order-info">
+                    <div class="order-detail">
+                        <strong>Order:</strong> #{{ order.order_number|default:order.id }}
+                    </div>
+                    <div class="order-detail">
+                        <strong>Date:</strong> {{ order.created_at|date:"M d, Y" }}
+                    </div>
+                    <div class="order-detail">
+                        <strong>Items:</strong> {{ order.items.count }}
+                    </div>
+                </div>
+                <div class="order-status status-{{ order.status }}">
+                    {{ order.get_status_display }}
+                </div>
+            </div>
+
+            <div class="order-items">
+                {% for item in order.items.all %}
+                <div class="order-item">
+                    <div class="item-image">
+                        {% if item.product.image %}
+                            <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}">
+                        {% else %}
+                            <div class="item-placeholder">
+                                No Image
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="item-details">
+                        <div class="item-name">{{ item.product.title }}</div>
+                        <div class="item-meta">
+                            Seller: {{ item.seller.username|default:item.product.seller.username }} • 
+                            Qty: {{ item.quantity }} • 
+                            Price: ${{ item.price }}
+                        </div>
+                        <div class="item-price">Total: ${{ item.total|default_if_none:item.price }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="order-summary">
+                <div class="order-total">
+                    Total: ${{ order.total_amount }}
+                </div>
+                <div class="order-actions">
+                    {% if order.items.first %}
+                        <a href="{% url 'product_detail' order.items.first.product.id %}" class="btn btn-secondary">
+                            View Products
+                        </a>
+                    {% endif %}
+                    {% if order.status == 'pending' %}
+                        <button class="btn btn-primary" onclick="showContactInfo('{{ order.items.first.seller.username }}', '{{ order.items.first.seller.email }}')">
+                            <i class="fas fa-phone"></i> Contact Seller
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-orders">
+            <div class="empty-orders-icon">
+                <i class="fas fa-shopping-bag"></i>
+            </div>
+            <h3>No orders yet</h3>
+            <p>You haven't placed any orders yet. Start shopping to see your orders here!</p>
+            <a href="{% url 'products' %}" class="btn btn-primary">Browse Products</a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Contact Modal -->
+<div id="contactModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div class="modal-content" style="background-color: white; margin: 15% auto; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center;">
+        <span class="close" onclick="closeContactModal()" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+        <h3 style="margin-top: 0; color: #333;">Contact Seller</h3>
+        <div id="contactInfo" style="margin: 20px 0;">
+            <!-- Contact info will be inserted here -->
+        </div>
+        <button onclick="closeContactModal()" class="btn btn-secondary" style="margin-top: 15px;">Close</button>
+    </div>
+</div>
+
+<script>
+function showContactInfo(username, email) {
+    const modal = document.getElementById('contactModal');
+    const contactInfo = document.getElementById('contactInfo');
+    
+    contactInfo.innerHTML = `
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+            <p style="margin: 0 0 10px 0; color: #666; font-size: 14px;">Contact the seller to arrange pickup/delivery:</p>
+            <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
+                <i class="fas fa-user" style="color: #666;"></i>
+                <strong>${username}</strong>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
+                <i class="fas fa-envelope" style="color: #666;"></i>
+                <a href="mailto:${email}" style="color: #007bff; text-decoration: none;">${email}</a>
+            </div>
+        </div>
+        <p style="font-size: 12px; color: #666; margin-top: 15px;">
+            <i class="fas fa-info-circle"></i> 
+            Please coordinate pickup location and time directly with the seller.
+        </p>
+    `;
+    
+    modal.style.display = 'block';
+}
+
+function closeContactModal() {
+    document.getElementById('contactModal').style.display = 'none';
+}
+
+// Close modal when clicking outside of it
+window.onclick = function(event) {
+    const modal = document.getElementById('contactModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

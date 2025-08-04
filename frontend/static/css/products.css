@@ -418,6 +418,34 @@ body {
     color: #fff;
 }
 
+.action-btn.disabled {
+    background: rgba(200, 200, 200, 0.5);
+    color: #999;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.action-btn.disabled:hover {
+    background: rgba(200, 200, 200, 0.5);
+    color: #999;
+}
+
+.add-to-cart-btn {
+    background: rgba(40, 167, 69, 0.9);
+    color: white;
+}
+
+.add-to-cart-btn:hover {
+    background: #28a745;
+    color: white;
+    transform: scale(1.1);
+}
+
+.like-btn.liked {
+    background: #ff6a00;
+    color: white;
+}
+
 .product-info {
     padding: 16px;
 }
@@ -514,6 +542,7 @@ body {
 
 /* Contact Button */
 .contact-btn {
+    display: block;
     width: 100%;
     padding: 8px 16px;
     background: #fff;
@@ -525,11 +554,33 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     margin-top: 8px;
+    text-decoration: none !important;
+    text-align: center;
+    box-sizing: border-box;
 }
 
 .contact-btn:hover {
     background: #ff6a00;
     color: #fff;
+    text-decoration: none !important;
+}
+
+.contact-btn:focus,
+.contact-btn:active,
+.contact-btn:visited {
+    text-decoration: none !important;
+}
+
+.contact-btn.disabled {
+    background: #f5f5f5;
+    border-color: #d9d9d9;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.contact-btn.disabled:hover {
+    background: #f5f5f5;
+    color: #999;
 }
 
 /* No Products */

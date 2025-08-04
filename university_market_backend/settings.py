@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-710w$g7%$1h15%zryjnqtb3b-r2np@0_$q5zpqn!#m!7$jef(+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
 
 
 # Application definition
@@ -75,24 +75,25 @@ WSGI_APPLICATION = "university_market_backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
-# PostgreSQL configuration (commented out for now)
+# SQLite configuration (backup)
 # DATABASES = {
 #     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": "university_market",
-#         "USER": "postgres",
-#         "PASSWORD": "password",
-#         "HOST": "localhost",
-#         "PORT": "5432",
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
 #     }
 # }
+
+# PostgreSQL configuration
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "university_market",
+        "USER": "user",  # Using current system user
+        "PASSWORD": "",  # No password needed for local development
+        "HOST": "localhost",
+        "PORT": "5432",
+    }
+}
 
 
 # Password validation

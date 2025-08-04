@@ -1,0 +1,326 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - University Local Market{% endblock %}
+
+{% block extra_css %}
+<style>
+    .checkout-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f8f8f8;
+        min-height: calc(100vh - 120px);
+    }
+
+    .checkout-header {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .checkout-header h1 {
+        margin: 0;
+        font-size: 24px;
+        color: #333;
+        font-weight: 600;
+    }
+
+    .checkout-layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+    }
+
+    .checkout-form {
+        background: white;
+        border-radius: 8px;
+        padding: 30px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .form-section {
+        margin-bottom: 30px;
+    }
+
+    .form-section h3 {
+        font-size: 18px;
+        color: #333;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #ff6a00;
+        box-shadow: 0 0 0 2px rgba(255, 106, 0, 0.1);
+    }
+
+    .form-group textarea {
+        height: 80px;
+        resize: vertical;
+    }
+
+    .required {
+        color: #e74c3c;
+    }
+
+    .order-summary {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+    }
+
+    .summary-header {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .order-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #f8f8f8;
+    }
+
+    .order-item:last-child {
+        border-bottom: none;
+    }
+
+    .item-info {
+        flex: 1;
+    }
+
+    .item-name {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 4px;
+    }
+
+    .item-details {
+        font-size: 12px;
+        color: #666;
+    }
+
+    .item-price {
+        font-weight: 600;
+        color: #ff6a00;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 15px 0;
+        font-size: 14px;
+    }
+
+    .summary-row.total {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        padding-top: 15px;
+        border-top: 1px solid #f0f0f0;
+        margin-top: 20px;
+    }
+
+    .summary-row .price {
+        color: #ff6a00;
+        font-weight: 600;
+    }
+
+    .place-order-btn {
+        width: 100%;
+        padding: 15px;
+        background: #ff6a00;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background 0.2s ease;
+    }
+
+    .place-order-btn:hover {
+        background: #e55a00;
+    }
+
+    .place-order-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+
+    .back-to-cart {
+        width: 100%;
+        padding: 10px;
+        background: white;
+        color: #666;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 15px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .back-to-cart:hover {
+        background: #f8f8f8;
+        border-color: #bbb;
+        text-decoration: none;
+        color: #333;
+    }
+
+    @media (max-width: 768px) {
+        .checkout-page {
+            padding: 15px;
+        }
+
+        .checkout-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .checkout-form {
+            padding: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-page">
+    <div class="checkout-header">
+        <h1>Checkout</h1>
+    </div>
+
+    <div class="checkout-layout">
+        <div class="checkout-form">
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Contact Information -->
+                <div class="form-section">
+                    <h3>Contact Information</h3>
+                    <div class="form-group">
+                        <label for="buyer_name">Full Name <span class="required">*</span></label>
+                        <input type="text" id="buyer_name" name="buyer_name" 
+                               value="{{ user.get_full_name|default:user.username }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="buyer_email">Email Address <span class="required">*</span></label>
+                        <input type="email" id="buyer_email" name="buyer_email" 
+                               value="{{ user.email }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="buyer_phone">Phone Number <span class="required">*</span></label>
+                        <input type="tel" id="buyer_phone" name="buyer_phone" 
+                               placeholder="e.g., +1 (555) 123-4567" required>
+                    </div>
+                </div>
+
+                <!-- Delivery Information -->
+                <div class="form-section">
+                    <h3>Delivery Information</h3>
+                    <div class="form-group">
+                        <label for="delivery_address">Campus Address/Location <span class="required">*</span></label>
+                        <textarea id="delivery_address" name="delivery_address" 
+                                  placeholder="e.g., Smith Hall Room 205, or Library Main Entrance" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="delivery_notes">Special Instructions (Optional)</label>
+                        <textarea id="delivery_notes" name="delivery_notes" 
+                                  placeholder="Any special delivery instructions or preferred meeting times"></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="place-order-btn">
+                    <i class="fas fa-credit-card"></i> Place Order
+                </button>
+            </form>
+        </div>
+
+        <div class="order-summary">
+            <div class="summary-header">Order Summary</div>
+            
+            {% for item in cart.items.all %}
+            <div class="order-item">
+                <div class="item-info">
+                    <div class="item-name">{{ item.product.title }}</div>
+                    <div class="item-details">
+                        Qty: {{ item.quantity }} × ${{ item.product.price }}
+                    </div>
+                </div>
+                <div class="item-price">${{ item.get_total_price }}</div>
+            </div>
+            {% endfor %}
+
+            <div class="summary-row">
+                <span>Subtotal ({{ cart.items.count }} items)</span>
+                <span class="price">${{ cart.get_total_price }}</span>
+            </div>
+            <div class="summary-row">
+                <span>Shipping</span>
+                <span style="color: #666;">Free (Campus pickup)</span>
+            </div>
+            <div class="summary-row total">
+                <span>Total</span>
+                <span class="price">${{ cart.get_total_price }}</span>
+            </div>
+
+            <a href="{% url 'cart' %}" class="back-to-cart">
+                <i class="fas fa-arrow-left"></i> Back to Cart
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const submitBtn = document.querySelector('.place-order-btn');
+    
+    form.addEventListener('submit', function() {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    });
+});
+</script>
+{% endblock %}

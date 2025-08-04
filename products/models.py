@@ -37,11 +37,36 @@ class Product(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
     image = models.ImageField(upload_to='products/', blank=True, null=True)
     location = models.CharField(max_length=200, help_text="Where on campus to meet")
+    
+    # Seller contact information (optional - can override profile defaults)
+    seller_phone = models.CharField(max_length=15, blank=True, help_text="Contact phone number for this product")
+    seller_email = models.EmailField(blank=True, help_text="Contact email for this product (if different from account email)")
+    preferred_contact_method = models.CharField(
+        max_length=20,
+        choices=[
+            ('email', 'Email'),
+            ('phone', 'Phone'),
+            ('message', 'In-app Message'),
+            ('any', 'Any Method')
+        ],
+        default='message',
+        help_text="Preferred way for buyers to contact you"
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return self.title
+    
+    def get_seller_contact_info(self):
+        """Get seller contact information, falling back to profile defaults"""
+        contact_info = {
+            'phone': self.seller_phone or getattr(self.seller.userprofile, 'phone_number', ''),
+            'email': self.seller_email or self.seller.email,
+            'preferred_method': self.preferred_contact_method
+        }
+        return contact_info
 
     class Meta:
         ordering = ['-created_at']
@@ -63,7 +88,9 @@ class Cart(models.Model):
         return f"Cart for {self.user.username}"
 
     def get_total_price(self):
-        return sum(item.get_total_price() for item in self.items.all())
+        from decimal import Decimal
+        total = sum(item.get_total_price() for item in self.items.all())
+        return Decimal(str(total)) if total else Decimal('0.00')
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
@@ -75,7 +102,8 @@ class CartItem(models.Model):
         return f"{self.quantity} x {self.product.title}"
 
     def get_total_price(self):
-        return self.quantity * self.product.price
+        from decimal import Decimal
+        return Decimal(str(self.quantity)) * self.product.price
 
     class Meta:
         unique_together = ['cart', 'product']
@@ -134,6 +162,9 @@ class Message(models.Model):
     # Optional fields for offers
     offered_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     
+    # For reply threading
+    parent_message = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -165,3 +196,69 @@ class ProductView(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+class Order(models.Model):
+    ORDER_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('processing', 'Processing'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    PAYMENT_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('failed', 'Failed'),
+        ('refunded', 'Refunded'),
+    ]
+    
+    # Order details
+    order_number = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+    
+    # Contact information
+    buyer_name = models.CharField(max_length=100, null=True, blank=True)
+    buyer_email = models.EmailField(null=True, blank=True)
+    buyer_phone = models.CharField(max_length=20, null=True, blank=True)
+    
+    # Delivery information
+    delivery_address = models.TextField(null=True, blank=True)
+    delivery_notes = models.TextField(blank=True)
+    
+    # Order status
+    status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='pending')
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending', null=True, blank=True)
+    
+    # Pricing
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"Order {self.order_number} by {self.buyer.username}"
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+    
+    class Meta:
+        ordering = ['-created_at']
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sold_items', null=True, blank=True)
+    
+    quantity = models.PositiveIntegerField(default=1)
+    price = models.DecimalField(max_digits=10, decimal_places=2)  # Price at time of order
+    total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # quantity * price
+    
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    
+    def __str__(self):
+        return f"{self.quantity}x {self.product.title} in Order {self.order.order_number if self.order.order_number else self.order.id}"

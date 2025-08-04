@@ -56,3 +56,157 @@ main {
 	object-fit: cover;
 	border-radius: 50%;
 }
+
+/* Add Product Page Styles */
+.add-product-form {
+	background: #fff;
+	border-radius: 12px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.add-product-form .card-header {
+	background: linear-gradient(135deg, #007bff, #0056b3);
+	color: white;
+	border-radius: 12px 12px 0 0;
+}
+
+.image-preview-container {
+	border: 2px dashed #dee2e6;
+	border-radius: 8px;
+	padding: 20px;
+	text-align: center;
+	transition: border-color 0.3s ease;
+}
+
+.image-preview-container:hover {
+	border-color: #007bff;
+}
+
+.image-preview-container.has-image {
+	border-style: solid;
+	border-color: #28a745;
+}
+
+.form-control:focus {
+	border-color: #007bff;
+	box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.btn-primary {
+	background: linear-gradient(135deg, #007bff, #0056b3);
+	border: none;
+	border-radius: 8px;
+	padding: 12px 30px;
+	font-weight: 600;
+	transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+	background: linear-gradient(135deg, #0056b3, #004085);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.btn-secondary {
+	border-radius: 8px;
+	padding: 12px 30px;
+	font-weight: 600;
+}
+
+/* Image preview styles */
+.img-thumbnail {
+	border-radius: 8px;
+	transition: transform 0.2s ease;
+}
+
+.img-thumbnail:hover {
+	transform: scale(1.05);
+}
+
+/* Form section headers */
+.add-product-form h5 {
+	color: #495057;
+	font-weight: 600;
+	margin-bottom: 1rem;
+	padding-bottom: 0.5rem;
+	border-bottom: 2px solid #e9ecef;
+}
+
+/* Alert improvements */
+.alert-info {
+	background-color: #e3f2fd;
+	border-color: #bbdefb;
+	color: #1976d2;
+	border-radius: 8px;
+}
+
+/* Loading button animation */
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+.fa-spin {
+	animation: spin 1s linear infinite;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+	.add-product-form {
+		margin: 10px;
+	}
+	
+	.btn-primary, .btn-secondary {
+		width: 100%;
+		margin-bottom: 10px;
+	}
+}
+
+/* Success messages styling */
+.messages {
+	position: fixed;
+	top: 20px;
+	right: 20px;
+	z-index: 9999;
+	max-width: 400px;
+}
+
+.messages .alert {
+	margin-bottom: 10px;
+	border-radius: 8px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	border: none;
+	animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+	from {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+.alert-success {
+	background: linear-gradient(135deg, #28a745, #20c997);
+	color: white;
+	border: none;
+}
+
+.alert-error,
+.alert-danger {
+	background: linear-gradient(135deg, #dc3545, #e74c3c);
+	color: white;
+	border: none;
+}
+
+/* Removed duplicate alert-info - using the one above with better styling */
+
+.alert-warning {
+	background: linear-gradient(135deg, #ffc107, #fd7e14);
+	color: #333;
+	border: none;
+}

@@ -47,13 +47,39 @@ class CartItemAdmin(admin.ModelAdmin):
     list_display = ['cart', 'product', 'quantity', 'created_at']
     list_filter = ['created_at']
 
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 0
+    readonly_fields = ['total']
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['buyer', 'total_amount', 'status', 'created_at']
-    list_filter = ['status', 'created_at']
-    search_fields = ['buyer__username']
+    list_display = ['order_number', 'buyer', 'buyer_name', 'total_amount', 'status', 'payment_status', 'created_at']
+    list_filter = ['status', 'payment_status', 'created_at']
+    search_fields = ['order_number', 'buyer__username', 'buyer_name', 'buyer_email']
+    readonly_fields = ['created_at', 'updated_at']
+    inlines = [OrderItemInline]
+    
+    fieldsets = (
+        ('Order Information', {
+            'fields': ('order_number', 'buyer', 'status', 'payment_status')
+        }),
+        ('Contact Information', {
+            'fields': ('buyer_name', 'buyer_email', 'buyer_phone')
+        }),
+        ('Delivery Information', {
+            'fields': ('delivery_address', 'delivery_notes')
+        }),
+        ('Pricing', {
+            'fields': ('subtotal', 'shipping_cost', 'total_amount')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at')
+        }),
+    )
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ['order', 'product', 'quantity', 'price']
-    list_filter = ['order__created_at']
+    list_display = ['order', 'product', 'seller', 'quantity', 'price', 'total']
+    list_filter = ['created_at']
+    search_fields = ['order__order_number', 'product__title', 'seller__username']

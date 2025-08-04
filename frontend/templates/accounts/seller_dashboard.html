@@ -347,11 +347,11 @@
                 <p class="dashboard-subtitle">Welcome back, {{ user.first_name|default:user.username }}!</p>
             </div>
             <div class="dashboard-actions">
-                <a href="{% url 'products' %}" class="dashboard-btn dashboard-btn-secondary">
-                    <i class="fas fa-store"></i>
-                    Browse Products
+                <a href="{% url 'my_products' %}" class="dashboard-btn dashboard-btn-secondary">
+                    <i class="fas fa-box"></i>
+                    My Products
                 </a>
-                <a href="#" class="dashboard-btn dashboard-btn-primary">
+                <a href="{% url 'add_product' %}" class="dashboard-btn dashboard-btn-primary">
                     <i class="fas fa-plus"></i>
                     Add Product
                 </a>

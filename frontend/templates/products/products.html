@@ -139,11 +139,11 @@
                     <div class="product-card">
                         <!-- Product Image -->
                         <div class="product-image-container">
-                            {% if product.images.first %}
-                                <img src="{{ product.images.first.image.url }}" 
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" 
                                      alt="{{ product.title }}" class="product-image">
                             {% else %}
-                                <img src="{% static 'images/no-image.png' %}" 
+                                <img src="{% static 'images/no-image.svg' %}" 
                                      alt="No image available" class="product-image">
                             {% endif %}
                             
@@ -158,15 +158,37 @@
                             
                             <!-- Product Actions -->
                             <div class="product-actions">
-                                <button class="action-btn" title="Add to Wishlist">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                                <button class="action-btn" title="Quick View">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="action-btn" title="Compare">
-                                    <i class="fas fa-balance-scale"></i>
-                                </button>
+                                {% if user.is_authenticated and user != product.seller %}
+                                    <button class="action-btn like-btn {% if product.id in liked_products %}liked{% endif %}" title="{% if product.id in liked_products %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}" data-product-id="{{ product.id }}">
+                                        <i class="{% if product.id in liked_products %}fas{% else %}far{% endif %} fa-heart"></i>
+                                    </button>
+                                    <button class="action-btn" title="Quick View" onclick="window.location.href='{% url 'product_detail' product.id %}'">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="action-btn add-to-cart-btn" title="Add to Cart" data-product-id="{{ product.id }}">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </button>
+                                {% elif user == product.seller %}
+                                    <button class="action-btn disabled" title="Your Product" disabled>
+                                        <i class="fas fa-user"></i>
+                                    </button>
+                                    <button class="action-btn" title="View Product" onclick="window.location.href='{% url 'product_detail' product.id %}'">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="action-btn disabled" title="Your Product" disabled>
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                {% else %}
+                                    <button class="action-btn" title="Login to Like" onclick="window.location.href='{% url 'login' %}'">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                    <button class="action-btn" title="Quick View" onclick="window.location.href='{% url 'product_detail' product.id %}'">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="action-btn" title="Login to Add to Cart" onclick="window.location.href='{% url 'login' %}'">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </button>
+                                {% endif %}
                             </div>
                         </div>
 
@@ -216,10 +238,22 @@
                             </div>
                             
                             <!-- Contact Button -->
-                            <button class="contact-btn">
-                                <i class="fas fa-envelope"></i>
-                                Contact Supplier
-                            </button>
+                            {% if user.is_authenticated and user != product.seller %}
+                                <a href="{% url 'contact_seller' product.id %}" class="contact-btn">
+                                    <i class="fas fa-envelope"></i>
+                                    Contact Supplier
+                                </a>
+                            {% elif user == product.seller %}
+                                <button class="contact-btn disabled" disabled>
+                                    <i class="fas fa-user"></i>
+                                    Your Product
+                                </button>
+                            {% else %}
+                                <a href="{% url 'login' %}" class="contact-btn">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    Login to Contact
+                                </a>
+                            {% endif %}
                         </div>
                     </div>
                     {% endfor %}
@@ -248,34 +282,147 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Wishlist functionality
-    const wishlistBtns = document.querySelectorAll('.action-btn');
-    wishlistBtns.forEach(btn => {
+    // Like/Wishlist functionality
+    const likeBtns = document.querySelectorAll('.like-btn');
+    likeBtns.forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
-            const icon = this.querySelector('i');
-            if (icon.classList.contains('far')) {
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-                this.style.background = '#ff6a00';
-                this.style.color = '#fff';
-            } else if (icon.classList.contains('fa-heart')) {
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-                this.style.background = 'rgba(255,255,255,0.9)';
-                this.style.color = '#666';
-            }
+            const productId = this.dataset.productId;
+            toggleLike(productId, this);
         });
     });
 
-    // Contact supplier functionality
-    const contactBtns = document.querySelectorAll('.contact-btn');
-    contactBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            // Add your contact supplier logic here
-            alert('Contact supplier functionality would be implemented here');
+    // Add to Cart functionality
+    const cartBtns = document.querySelectorAll('.add-to-cart-btn');
+    cartBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const productId = this.dataset.productId;
+            addToCartFromGrid(productId, this);
         });
     });
 });
+
+// Toggle like function
+function toggleLike(productId, button) {
+    fetch(`/toggle-like/${productId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const icon = button.querySelector('i');
+            if (data.liked) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                button.style.background = '#ff6a00';
+                button.style.color = '#fff';
+                showMessage('Added to wishlist!', 'success');
+            } else {
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                button.style.background = 'rgba(255,255,255,0.9)';
+                button.style.color = '#666';
+                showMessage('Removed from wishlist!', 'info');
+            }
+        } else {
+            showMessage('Error updating wishlist', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showMessage('Error updating wishlist', 'error');
+    });
+}
+
+// Add to cart from grid function
+function addToCartFromGrid(productId, button) {
+    // Add loading state
+    const originalIcon = button.querySelector('i').className;
+    button.querySelector('i').className = 'fas fa-spinner fa-spin';
+    button.disabled = true;
+
+    fetch('/api/cart/add/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            product_id: productId,
+            quantity: 1
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showMessage(data.message || 'Product added to cart!', 'success');
+            // Temporarily change icon to check mark
+            button.querySelector('i').className = 'fas fa-check';
+            setTimeout(() => {
+                button.querySelector('i').className = originalIcon;
+                button.disabled = false;
+            }, 1500);
+        } else {
+            showMessage(data.error || 'Failed to add product to cart.', 'error');
+            button.querySelector('i').className = originalIcon;
+            button.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showMessage('An error occurred.', 'error');
+        button.querySelector('i').className = originalIcon;
+        button.disabled = false;
+    });
+}
+
+// Helper function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Show message function
+function showMessage(message, type) {
+    // Remove existing messages
+    const existingMessages = document.querySelectorAll('.alert-message');
+    existingMessages.forEach(msg => msg.remove());
+
+    const alertDiv = document.createElement('div');
+    alertDiv.classList.add('alert', `alert-${type === 'error' ? 'danger' : type}`, 'alert-message');
+    alertDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        max-width: 400px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        animation: slideInRight 0.3s ease-out;
+    `;
+    alertDiv.textContent = message;
+    
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 3000);
+}
 </script>
 {% endblock %}

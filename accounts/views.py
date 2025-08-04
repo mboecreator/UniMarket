@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -8,19 +8,68 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.db.models import Count, Q
 from .models import UserProfile, SellerSubscription
-from products.models import Product, Message, ProductLike, ProductView
+from .forms import SimpleUserCreationForm
+from products.models import Product, Message, ProductLike, ProductView, Order
 
 def register(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = SimpleUserCreationForm(request.POST)
+        user_type = request.POST.get('user_type', 'buyer')
+        
         if form.is_valid():
             user = form.save()
+            
+            # Create user profile
+            UserProfile.objects.create(
+                user=user,
+                student_id=None,  # Will be filled later in profile completion
+                university='',  # Will be filled later in profile completion
+            )
+            
             username = form.cleaned_data.get('username')
-            messages.success(request, f'Account created for {username}!')
-            return redirect('login')
+            messages.success(request, f'Account created successfully for {username}!')
+            
+            # Auto-login the user
+            login(request, user)
+            
+            # Redirect based on user type
+            if user_type == 'seller':
+                return redirect('subscription_plans')
+            else:
+                return redirect('products')  # Redirect buyers to products page
     else:
-        form = UserCreationForm()
+        form = SimpleUserCreationForm()
+    
     return render(request, 'accounts/register.html', {'form': form})
+
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        user_type = request.POST.get('user_type', 'buyer')
+        
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'Welcome back, {username}!')
+                
+                # Redirect based on user type
+                if user_type == 'seller':
+                    # Check if user has seller subscription
+                    profile, created = UserProfile.objects.get_or_create(user=user)
+                    if profile.can_post_products():
+                        return redirect('seller_dashboard')
+                    else:
+                        return redirect('subscription_plans')
+                else:
+                    return redirect('products')  # Redirect buyers to products page
+    else:
+        form = AuthenticationForm()
+    
+    return render(request, 'accounts/login.html', {'form': form})
 
 @login_required
 def profile(request):
@@ -131,12 +180,6 @@ def seller_messages(request):
         recipient=request.user
     ).select_related('sender', 'product').order_by('-created_at')
     
-    # Mark messages as read when viewed
-    Message.objects.filter(
-        recipient=request.user,
-        is_read=False
-    ).update(is_read=True)
-    
     context = {
         'messages': messages_list,
     }
@@ -162,3 +205,14 @@ def seller_products(request):
     }
     
     return render(request, 'accounts/seller_products.html', context)
+
+@login_required
+def my_orders(request):
+    """View user's orders"""
+    orders = Order.objects.filter(buyer=request.user).prefetch_related('items__product').order_by('-created_at')
+    
+    context = {
+        'orders': orders,
+    }
+    
+    return render(request, 'accounts/my_orders.html', context)

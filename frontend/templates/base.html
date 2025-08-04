@@ -479,9 +479,13 @@
                                     <a href="{% url 'profile' %}"><i class="fas fa-user-circle"></i> My Profile</a>
                                     {% if user.userprofile.can_post_products %}
                                         <a href="{% url 'seller_dashboard' %}"><i class="fas fa-tachometer-alt"></i> Seller Dashboard</a>
+                                        <a href="{% url 'add_product' %}"><i class="fas fa-plus-circle"></i> Add Product</a>
+                                        <a href="{% url 'my_products' %}"><i class="fas fa-box"></i> My Products</a>
                                     {% else %}
                                         <a href="{% url 'subscription_plans' %}"><i class="fas fa-crown"></i> Become a Seller</a>
                                     {% endif %}
+                                    <a href="{% url 'my_messages' %}"><i class="fas fa-envelope"></i> My Messages</a>
+                                    <a href="{% url 'my_orders' %}"><i class="fas fa-list"></i> My Orders</a>
                                     <a href="{% url 'cart' %}"><i class="fas fa-shopping-cart"></i> My Cart</a>
                                     <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
                                 </div>
@@ -578,6 +582,9 @@
             }
         });
     </script>
+    
+    <!-- Authentication page enhancements -->
+    <script src="{% static 'js/auth.js' %}"></script>
     
     {% block extra_js %}{% endblock %}
 </body>

@@ -1,58 +1,341 @@
 {% extends 'base.html' %}
 
-{% block title %}Login - University Local Market{% endblock %}
+{% block title %}Sign In - CampusConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-page {
+        background: #f8f8f8;
+        min-height: calc(100vh - 120px);
+    }
+
+    .auth-section {
+        background: linear-gradient(135deg, #ff6a00, #e55a00);
+        color: white;
+        padding: 60px 0 80px 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-section::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background: #f8f8f8;
+        border-radius: 40px 40px 0 0;
+    }
+
+    .auth-container {
+        max-width: 500px;
+        margin: -40px auto 0;
+        padding: 0 20px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .auth-card {
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        border: 1px solid #e6e6e6;
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .auth-title {
+        font-size: 28px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+    }
+
+    .auth-subtitle {
+        font-size: 16px;
+        color: #666;
+        margin-bottom: 20px;
+    }
+
+    .user-type-selector {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+        background: #f8f8f8;
+        padding: 4px;
+        border-radius: 8px;
+    }
+
+    .user-type-option {
+        flex: 1;
+        padding: 12px;
+        text-align: center;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: 500;
+        border: none;
+        background: transparent;
+        color: #666;
+    }
+
+    .user-type-option.active {
+        background: #ff6a00;
+        color: white;
+        box-shadow: 0 2px 8px rgba(255, 106, 0, 0.3);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.2s ease;
+        background: #fff;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #ff6a00;
+        box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.1);
+    }
+
+    .auth-btn {
+        width: 100%;
+        padding: 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #ff6a00;
+        color: white;
+        box-shadow: 0 2px 8px rgba(255, 106, 0, 0.3);
+    }
+
+    .auth-btn:hover {
+        background: #e55a00;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 106, 0, 0.4);
+    }
+
+    .auth-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e6e6e6;
+    }
+
+    .auth-footer p {
+        color: #666;
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .auth-link {
+        color: #ff6a00;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s ease;
+    }
+
+    .auth-link:hover {
+        color: #e55a00;
+    }
+
+    .alert {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+    }
+
+    .alert-danger {
+        background: #fef2f2;
+        border-color: #fecaca;
+        color: #dc2626;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .auth-section {
+            padding: 40px 0 60px 0;
+        }
+        
+        .auth-container {
+            margin: -30px auto 0;
+            padding: 0 15px;
+        }
+        
+        .auth-card {
+            padding: 30px 20px;
+        }
+        
+        .auth-title {
+            font-size: 24px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .user-type-selector {
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .user-type-option {
+            padding: 14px;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="text-center">Login</h3>
-            </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    
-                    {% if form.errors %}
-                        <div class="alert alert-danger">
-                            {{ form.errors }}
-                        </div>
-                    {% endif %}
-                    
-                    <div class="mb-3">
-                        <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
-                        {{ form.username }}
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
-                        {{ form.password }}
-                    </div>
-                    
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Login</button>
-                    </div>
-                </form>
+<div class="auth-page">
+    <!-- Header Section -->
+    <section class="auth-section">
+        <div style="max-width: 600px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 2;">
+            <h1 style="font-size: 36px; font-weight: 700; margin-bottom: 16px;">Welcome Back</h1>
+            <p style="font-size: 18px; opacity: 0.9; margin: 0;">Sign in to your CampusConnect account</p>
+        </div>
+    </section>
+
+    <!-- Form Section -->
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2 class="auth-title">Sign In</h2>
+                <p class="auth-subtitle">Choose your account type and sign in</p>
                 
-                <div class="text-center mt-3">
-                    <p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+                <!-- User Type Selector -->
+                <div class="user-type-selector">
+                    <button type="button" class="user-type-option active" data-type="buyer">
+                        <i class="fas fa-shopping-bag"></i> Buyer
+                    </button>
+                    <button type="button" class="user-type-option" data-type="seller">
+                        <i class="fas fa-store"></i> Seller
+                    </button>
                 </div>
+            </div>
+
+            <form method="post" id="loginForm">
+                {% csrf_token %}
+                
+                <!-- Hidden field for user type -->
+                <input type="hidden" name="user_type" id="user_type" value="buyer">
+                
+                <!-- Error Messages -->
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Username Field -->
+                <div class="form-group">
+                    <label for="id_username" class="form-label">Username</label>
+                    <input type="text" 
+                           class="form-input" 
+                           id="id_username" 
+                           name="username" 
+                           placeholder="Enter your username"
+                           value="{{ form.username.value|default:'' }}"
+                           required>
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-group">
+                    <label for="id_password" class="form-label">Password</label>
+                    <input type="password" 
+                           class="form-input" 
+                           id="id_password" 
+                           name="password" 
+                           placeholder="Enter your password"
+                           required>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="auth-btn" id="loginBtn">
+                    <span class="btn-text">Sign In</span>
+                    <i class="fas fa-spinner fa-spin" id="btn-spinner" style="display: none; margin-left: 8px;"></i>
+                </button>
+            </form>
+
+            <!-- Footer -->
+            <div class="auth-footer">
+                <p>Don't have an account? 
+                    <a href="{% url 'register' %}" class="auth-link">Sign up here</a>
+                </p>
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    .form-control {
-        margin-bottom: 10px;
-    }
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // User type selector
+    const userTypeOptions = document.querySelectorAll('.user-type-option');
+    const userTypeInput = document.getElementById('user_type');
     
-    #id_username, #id_password {
-        width: 100%;
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-    }
-</style>
+    userTypeOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            // Remove active class from all options
+            userTypeOptions.forEach(opt => opt.classList.remove('active'));
+            
+            // Add active class to clicked option
+            this.classList.add('active');
+            
+            // Update hidden input value
+            userTypeInput.value = this.dataset.type;
+        });
+    });
+    
+    // Form submission handling
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        const btn = document.getElementById('loginBtn');
+        const btnText = btn.querySelector('.btn-text');
+        const spinner = document.getElementById('btn-spinner');
+        
+        btn.disabled = true;
+        btnText.textContent = 'Signing In...';
+        spinner.style.display = 'inline-block';
+        
+        // Re-enable button after 10 seconds (in case of error)
+        setTimeout(() => {
+            btn.disabled = false;
+            btnText.textContent = 'Sign In';
+            spinner.style.display = 'none';
+        }, 10000);
+    });
+});
+</script>
 {% endblock %}

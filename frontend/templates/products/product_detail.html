@@ -7,21 +7,21 @@
     .product-detail-page {
         background: #f8f8f8;
         min-height: calc(100vh - 120px);
-        padding: 30px 0;
+        padding: 20px 0;
     }
 
     .product-container {
-        max-width: 1200px;
+        max-width: 900px;
         margin: 0 auto;
-        padding: 0 20px;
+        padding: 0 15px;
     }
 
     .product-card {
         background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        border-radius: 12px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
         overflow: hidden;
-        margin-bottom: 30px;
+        margin-bottom: 20px;
     }
 
     .product-image-section {
@@ -30,34 +30,37 @@
 
     .product-main-image {
         width: 100%;
-        height: 400px;
+        height: 250px;
         object-fit: cover;
+        object-position: center;
+        border-radius: 8px;
     }
 
     .product-image-placeholder {
         width: 100%;
-        height: 400px;
+        height: 250px;
         background: #f0f0f0;
         display: flex;
         align-items: center;
         justify-content: center;
         color: #999;
-        font-size: 18px;
+        font-size: 16px;
+        border-radius: 8px;
     }
 
     .product-content {
-        padding: 30px;
+        padding: 20px;
     }
 
     .product-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
     }
 
     .product-title {
-        font-size: 32px;
+        font-size: 24px;
         font-weight: 700;
         color: #333;
         margin: 0;
@@ -87,16 +90,16 @@
     .seller-info {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin-bottom: 20px;
-        padding: 15px;
+        gap: 10px;
+        margin-bottom: 15px;
+        padding: 12px;
         background: #f8f9fa;
-        border-radius: 12px;
+        border-radius: 8px;
     }
 
     .seller-avatar {
-        width: 50px;
-        height: 50px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         background: linear-gradient(135deg, #ff6a00, #e55a00);
         display: flex;
@@ -104,7 +107,7 @@
         justify-content: center;
         color: white;
         font-weight: 600;
-        font-size: 18px;
+        font-size: 16px;
     }
 
     .seller-details h6 {
@@ -121,15 +124,15 @@
 
     .product-badges {
         display: flex;
-        gap: 10px;
-        margin-bottom: 20px;
+        gap: 8px;
+        margin-bottom: 15px;
         flex-wrap: wrap;
     }
 
     .product-badge {
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 16px;
+        font-size: 11px;
         font-weight: 500;
         text-transform: uppercase;
     }
@@ -160,14 +163,15 @@
     }
 
     .product-price {
-        font-size: 36px;
+        font-size: 28px;
         font-weight: 700;
         color: #ff6a00;
-        margin-bottom: 25px;
+        margin-bottom: 18px;
     }
 
     .product-description {
-        margin-bottom: 25px;
+        margin-bottom: 18px;
+        line-height: 1.5;
     }
 
     .product-description h5 {
@@ -461,6 +465,45 @@
                     </div>
                 </div>
 
+                <!-- Seller Contact Information -->
+                {% if user.is_authenticated and user != product.seller %}
+                    <div class="seller-contact-info" style="background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 25px;">
+                        <h6 style="color: #333; margin-bottom: 15px; font-weight: 600;">
+                            <i class="fas fa-address-book" style="color: #ff6a00; margin-right: 8px;"></i>
+                            Seller Contact Information
+                        </h6>
+                        {% with contact_info=product.get_seller_contact_info %}
+                            <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                                {% if contact_info.phone %}
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <i class="fas fa-phone" style="color: #28a745; width: 16px;"></i>
+                                        <span style="color: #555; font-size: 14px;">{{ contact_info.phone }}</span>
+                                    </div>
+                                {% endif %}
+                                {% if contact_info.email %}
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <i class="fas fa-envelope" style="color: #007bff; width: 16px;"></i>
+                                        <span style="color: #555; font-size: 14px;">{{ contact_info.email }}</span>
+                                    </div>
+                                {% endif %}
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-comment-dots" style="color: #ff6a00; width: 16px;"></i>
+                                    <span style="color: #555; font-size: 14px;">
+                                        Prefers: {{ contact_info.preferred_method|title }}
+                                        {% if contact_info.preferred_method == 'message' %}Contact{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        {% endwith %}
+                        <div style="margin-top: 10px;">
+                            <small style="color: #666; font-style: italic;">
+                                <i class="fas fa-info-circle" style="margin-right: 4px;"></i>
+                                Use the "Contact Seller" button below for secure messaging
+                            </small>
+                        </div>
+                    </div>
+                {% endif %}
+
                 <!-- Product Meta -->
                 <div class="product-meta">
                     Listed {{ product.created_at|timesince }} ago
@@ -473,10 +516,10 @@
                 {% if user.is_authenticated %}
                     {% if user != product.seller and product.status == 'available' %}
                         <div class="product-actions">
-                            <button class="action-btn action-btn-primary" data-bs-toggle="modal" data-bs-target="#contactModal">
+                            <a href="{% url 'contact_seller' product.id %}" class="action-btn action-btn-primary">
                                 <i class="fas fa-envelope"></i>
                                 Contact Seller
-                            </button>
+                            </a>
                             <a href="{% url 'add_to_cart' product.id %}" class="action-btn action-btn-secondary">
                                 <i class="fas fa-cart-plus"></i>
                                 Add to Cart
@@ -488,14 +531,14 @@
                             This is your listing
                         </div>
                         <div class="product-actions">
-                            <button class="action-btn action-btn-primary">
+                            <a href="{% url 'edit_product' product.id %}" class="action-btn action-btn-primary">
                                 <i class="fas fa-edit"></i>
                                 Edit Listing
-                            </button>
-                            <button class="action-btn action-btn-secondary">
+                            </a>
+                            <a href="{% url 'delete_product' product.id %}" class="action-btn action-btn-secondary">
                                 <i class="fas fa-trash"></i>
                                 Delete Listing
-                            </button>
+                            </a>
                         </div>
                     {% else %}
                         <div class="unavailable-alert">

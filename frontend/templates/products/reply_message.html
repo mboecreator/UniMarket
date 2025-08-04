@@ -1,0 +1,557 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reply to Message - University Local Market{% endblock %}
+
+{% block extra_css %}
+<style>
+    .reply-page {
+        background: #f0f2f5;
+        min-height: calc(100vh - 120px);
+        padding: 0;
+        margin: 0;
+    }
+
+    .reply-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        height: calc(100vh - 120px);
+        display: flex;
+        flex-direction: column;
+        background: white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+
+    .reply-header {
+        padding: 16px 24px;
+        border-bottom: 1px solid #e4e6ea;
+        background: white;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #1877f2;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 8px 12px;
+        border-radius: 20px;
+        transition: background 0.2s ease;
+    }
+
+    .back-btn:hover {
+        background: #f0f2f5;
+        text-decoration: none;
+        color: #166fe5;
+    }
+
+    .reply-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #1c1e21;
+        margin: 0;
+    }
+
+    .chat-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #e5ddd5;
+        overflow: hidden;
+    }
+
+    .conversation-area {
+        flex: 1;
+        padding: 12px;
+        overflow-y: auto;
+        background: #e5ddd5;
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><defs><pattern id="pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23pattern)"/></svg>');
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    /* Chat Bubble Styles */
+    .message-bubble {
+        max-width: 45%;
+        margin-bottom: 8px;
+        position: relative;
+        word-wrap: break-word;
+    }
+
+    .message-bubble.received {
+        align-self: flex-start;
+    }
+
+    .message-bubble.sent {
+        align-self: flex-end;
+    }
+
+    .bubble-content {
+        padding: 6px 7px 8px 9px;
+        border-radius: 7.5px;
+        position: relative;
+        box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+    }
+
+    .message-bubble.received .bubble-content {
+        background: #ffffff;
+        border-bottom-left-radius: 2px;
+    }
+
+    .message-bubble.sent .bubble-content {
+        background: #d9fdd3;
+        border-bottom-right-radius: 2px;
+    }
+
+    .message-bubble.received .bubble-content::before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        bottom: 0;
+        width: 0;
+        height: 0;
+        border: 4px solid transparent;
+        border-right-color: #ffffff;
+        border-bottom-color: #ffffff;
+        border-bottom-right-radius: 2px;
+    }
+
+    .message-bubble.sent .bubble-content::before {
+        content: '';
+        position: absolute;
+        right: -8px;
+        bottom: 0;
+        width: 0;
+        height: 0;
+        border: 4px solid transparent;
+        border-left-color: #d9fdd3;
+        border-bottom-color: #d9fdd3;
+        border-bottom-left-radius: 2px;
+    }
+
+    .bubble-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .bubble-sender {
+        font-weight: 600;
+        color: #1c1e21;
+        font-size: 14px;
+    }
+
+    .bubble-time {
+        font-size: 11px;
+        color: #65676b;
+        margin-left: 8px;
+    }
+
+    .bubble-subject {
+        font-weight: 600;
+        color: #1c1e21;
+        margin-bottom: 6px;
+        font-size: 15px;
+    }
+
+    .bubble-text {
+        color: #1c1e21;
+        line-height: 1.4;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .bubble-product-card {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 12px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin: 8px 0;
+        border: 1px solid #e4e6ea;
+    }
+
+    .product-thumb {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        object-fit: cover;
+        background: #e4e6ea;
+    }
+
+    .product-thumb-placeholder {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        background: #e4e6ea;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #65676b;
+        font-size: 10px;
+    }
+
+    .product-card-info h6 {
+        margin: 0 0 4px 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: #1c1e21;
+    }
+
+    .product-card-price {
+        font-size: 12px;
+        color: #ff6a00;
+        font-weight: 600;
+    }
+
+    .offered-price-badge {
+        background: #e8f5e8;
+        color: #2e7d32;
+        padding: 6px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin: 4px 0;
+    }
+
+    .message-status {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        color: #65676b;
+        margin-top: 4px;
+        justify-content: flex-end;
+    }
+
+    .status-icon {
+        font-size: 12px;
+    }
+
+    .status-read {
+        color: #1877f2;
+    }
+
+    .status-delivered {
+        color: #65676b;
+    }
+
+    /* Reply Input Area */
+    .reply-input-area {
+        padding: 5px 16px 5px 10px;
+        background: #f0f2f5;
+        border-top: 1px solid #e4e6ea;
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        min-height: 62px;
+    }
+
+    .reply-form {
+        display: flex;
+        width: 100%;
+        gap: 8px;
+        align-items: flex-end;
+    }
+
+    .input-container {
+        flex: 1;
+        background: white;
+        border-radius: 21px;
+        display: flex;
+        align-items: flex-end;
+        min-height: 42px;
+        max-height: 100px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+
+    .subject-input {
+        display: none; /* Hide subject input for WhatsApp style */
+    }
+
+    .message-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        padding: 9px 12px 11px 12px;
+        font-size: 15px;
+        line-height: 20px;
+        background: transparent;
+        resize: none;
+        max-height: 100px;
+        min-height: 20px;
+        font-family: inherit;
+    }
+
+    .message-input::placeholder {
+        color: #8696a0;
+    }
+
+    .emoji-btn {
+        width: 24px;
+        height: 24px;
+        border: none;
+        background: transparent;
+        color: #8696a0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 9px 8px 9px 12px;
+        border-radius: 50%;
+        transition: background 0.2s ease;
+    }
+
+    .emoji-btn:hover {
+        background: rgba(134, 150, 160, 0.1);
+    }
+
+    .send-btn {
+        width: 42px;
+        height: 42px;
+        border: none;
+        border-radius: 50%;
+        background: #00a884;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .send-btn:hover {
+        background: #017561;
+    }
+
+    .send-btn:disabled {
+        background: #8696a0;
+        cursor: not-allowed;
+    }
+
+    .subject-input {
+        width: 100%;
+        padding: 10px 16px;
+        border: 1px solid #e4e6ea;
+        border-radius: 20px;
+        font-size: 14px;
+        outline: none;
+        transition: all 0.2s ease;
+        background: #f0f2f5;
+    }
+
+    .subject-input:focus {
+        background: white;
+        border-color: #1877f2;
+        box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.1);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .action-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .action-btn.secondary {
+        background: #f0f2f5;
+        color: #65676b;
+        border: 1px solid #e4e6ea;
+    }
+
+    .action-btn.secondary:hover {
+        background: #e4e6ea;
+        text-decoration: none;
+        color: #1c1e21;
+    }
+
+    .typing-indicator {
+        font-size: 12px;
+        color: #65676b;
+        font-style: italic;
+        margin-left: 16px;
+    }
+
+    @media (max-width: 768px) {
+        .reply-container {
+            height: calc(100vh - 120px);
+        }
+
+        .conversation-area {
+            padding: 16px;
+        }
+
+        .chat-bubble {
+            max-width: 85%;
+        }
+
+        .reply-input-area {
+            padding: 12px 16px;
+        }
+
+        .input-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .send-btn {
+            align-self: flex-end;
+            margin-top: 8px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="reply-page">
+    <div class="reply-container">
+        <!-- Header -->
+        <div class="reply-header">
+            <a href="{% url 'seller_messages' %}" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+            <h2 class="reply-title">
+                <i class="fas fa-reply"></i> Reply to {{ original_message.sender.first_name|default:original_message.sender.username }}
+            </h2>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <div class="conversation-area">
+                <!-- Original Message -->
+                <div class="message-bubble received">
+                    <div class="bubble-content">
+                        <div class="message-subject" style="font-weight: 600; font-size: 14.2px; color: #111b21; margin: 0 0 4px 0;">{{ original_message.subject }}</div>
+                        <div class="message-text" style="font-size: 14.2px; line-height: 19px; color: #111b21; margin: 0; word-wrap: break-word;">{{ original_message.content|linebreaks }}</div>
+                        
+                        {% if original_message.product %}
+                        <div class="bubble-product-card">
+                            {% if original_message.product.image %}
+                                <img src="{{ original_message.product.image.url }}" alt="{{ original_message.product.title }}" class="product-thumb">
+                            {% else %}
+                                <div class="product-thumb-placeholder">No Image</div>
+                            {% endif %}
+                            <div class="product-card-info">
+                                <h6>{{ original_message.product.title }}</h6>
+                                <div class="product-card-price">${{ original_message.product.price }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if original_message.offered_price %}
+                        <div class="offered-price-badge">
+                            <i class="fas fa-tag"></i> Offered: ${{ original_message.offered_price }}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="message-time" style="font-size: 11px; color: #667781; margin-top: 4px; text-align: right; display: flex; align-items: center; justify-content: flex-end; gap: 3px;">
+                            <span>{{ original_message.created_at|date:"H:i" }}</span>
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reply Input Area -->
+            <div class="reply-input-area">
+                <form method="post" class="reply-form" id="replyForm">
+                    {% csrf_token %}
+                    <input type="hidden" 
+                           name="subject" 
+                           value="Re: {{ original_message.subject }}">
+                    
+                    <div class="input-container">
+                        <button type="button" class="emoji-btn">
+                            <i class="far fa-smile"></i>
+                        </button>
+                        <textarea name="content" 
+                                  class="message-input" 
+                                  placeholder="Type a message" 
+                                  required
+                                  id="messageContent"
+                                  rows="1"></textarea>
+                    </div>
+                    <button type="submit" class="send-btn" id="sendBtn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-resize textarea
+const messageInput = document.getElementById('messageContent');
+const sendBtn = document.getElementById('sendBtn');
+const typingIndicator = document.getElementById('typingIndicator');
+
+messageInput.addEventListener('input', function() {
+    // Auto-resize
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    
+    // Enable/disable send button
+    sendBtn.disabled = !this.value.trim();
+    
+    // Show typing indicator
+    if (this.value.trim()) {
+        typingIndicator.style.display = 'inline';
+    } else {
+        typingIndicator.style.display = 'none';
+    }
+});
+
+// Handle form submission
+document.getElementById('replyForm').addEventListener('submit', function(e) {
+    const content = messageInput.value.trim();
+    if (!content) {
+        e.preventDefault();
+        return;
+    }
+    
+    // Show sending state
+    sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    sendBtn.disabled = true;
+});
+
+// Handle Enter key (Shift+Enter for new line, Enter to send)
+messageInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (this.value.trim()) {
+            document.getElementById('replyForm').submit();
+        }
+    }
+});
+
+// Initial state
+sendBtn.disabled = !messageInput.value.trim();
+</script>
+{% endblock %}

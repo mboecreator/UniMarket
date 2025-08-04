@@ -36,9 +36,13 @@ function addToCart(productId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showMessage('Product added to cart!', 'success');
+            showMessage(data.message || 'Product added to cart!', 'success');
+            // Update cart total if element exists
+            if (data.cart_total) {
+                updateCartTotal(data.cart_total);
+            }
         } else {
-            showMessage('Failed to add product to cart.', 'error');
+            showMessage(data.error || 'Failed to add product to cart.', 'error');
         }
     })
     .catch(error => {
@@ -63,9 +67,10 @@ function updateCartQuantity(productId, quantity) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            showMessage(data.message || 'Cart updated!', 'success');
             updateCartTotal(data.total);
         } else {
-            showMessage('Failed to update cart.', 'error');
+            showMessage(data.error || 'Failed to update cart.', 'error');
         }
     })
     .catch(error => {
